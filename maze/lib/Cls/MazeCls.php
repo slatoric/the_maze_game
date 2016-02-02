@@ -2,7 +2,8 @@
 namespace lib\cls;
 class MazeCls
 {
-    public function draw_map(array $aMap){
-        return MapPicCls4MapIfc::draw_map($aMap);
+    public function view($iH,$iV){
+        
+        return $aRes;
     }
 }
