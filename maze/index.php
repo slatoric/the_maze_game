@@ -2,6 +2,7 @@
 namespace lib;//namespace for all library
 require_once("ald.php");//registers standart autoloader
 if(!defined("BDR"))define("BDR",getcwd());
+if(!session_id())session_start();
 $aMap=[
 [1,0,1,1,1,1,1,1,1],
 [1,0,0,0,0,0,0,0,1],
@@ -31,5 +32,8 @@ $oJoy->get_dir();
 //echo "<pre>oJoy";var_dump($oJoy);echo "</pre>";
 $oTmg=new cls\MazeCls();
 echo "<pre>oTmg";var_dump($oTmg);echo "</pre>";
-echo $oTmg->show_hi();
+echo $oTmg->say_hi();
 $oTmg->set_user();
+echo "<pre>oTmg";var_dump($oTmg);echo "</pre>";
+
+echo "<pre>session_id";var_dump(session_id());echo "</pre>";
