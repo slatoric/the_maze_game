@@ -1,8 +1,8 @@
 <?php
-namespace lib\cls;
-class LngFileCls4LngIfc implements \lib\ifc\LngIfc
+namespace core\lib\cls;
+class LngFileCls4LngIfc implements \core\lib\ifc\LngIfc
 {
-    const PTH="/lib/lng/";
+    const PTH="/core/lib/lng/";
     private $sLngDef=en;
     private $sLng;
     function __construct(){

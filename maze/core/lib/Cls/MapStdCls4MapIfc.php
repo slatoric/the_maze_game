@@ -1,6 +1,6 @@
 <?php
-namespace lib\cls;
-class MapStdCls4MapIfc implements \lib\ifc\MapIfc
+namespace core\lib\cls;
+class MapStdCls4MapIfc implements \core\lib\ifc\MapIfc
 {
     public static function draw_map(array $aMap)
     {

@@ -1,5 +1,5 @@
 <?php
-namespace lib\cls;
+namespace core\lib\cls;
 class JoysCls
 {
     const UP=0,RT=2,DN=4,LT=6;

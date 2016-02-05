@@ -1,5 +1,5 @@
 <?php
-namespace lib\cls;
+namespace core\lib\cls;
 class TileCls
 {
     private $aPos;
