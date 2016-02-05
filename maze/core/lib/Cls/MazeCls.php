@@ -43,17 +43,16 @@ class MazeCls
             </form>";
         return $sHtm;
     }
-    public function man_user(){
-        if(!$this->oUser)$this->oUser=new UserCls();
-        if(!$aDta=$this->oUser->get_user()){
-            if($_REQUEST["aut"])$aDta=$this->oUser->set_user(["dta_reg"=>date("Y-m-d H:i:s")]);
-            else $sAut=$this->oUser->show_frm_aut();}
+    public function set_user(){
+        $oUsr=new UserCls();
+        if(!$aDta=$oUsr->get_user()){
+            if($_REQUEST["aut"])$aDta=$oUsr->set_user(["dta_reg"=>date("Y-m-d H:i:s")]);
+            else $sAut=$oUsr->show_frm_aut();}
         $sHtm=$this->say_hi($aDta["lgn"]).$sAut;
-        if($aDta)$sHtm.=$this->show_menu_main();
+        if(($aDta)and(!$this->oUsr))$this->oUser=$oUsr;
         return $sHtm;
     }
     public function get_user(){
-        
-        return $oUsr;
+        return $this->oUser;
     }
 }

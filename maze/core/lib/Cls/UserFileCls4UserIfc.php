@@ -6,7 +6,7 @@ class UserFileCls4UserIfc implements \core\lib\ifc\UserIfc
     public static function get_user($sLgn,$sPsw,$sSes){
         if((($sLgn)and($sPsw||$sSes))and(file_exists($sFnm=BDR.self::PTH.$sLgn)))
             $aDta=unserialize(file_get_contents($sFnm));
-            if(($aDta["psw"]==md5($sPsw))or($aDta["ses"]==$sSes))$aDtr=$aDta;
+        if(($aDta["psw"]==md5($sPsw))or($aDta["ses"]==$sSes))$aDtr=$aDta;
         return $aDtr;
     }
     public static function set_user($sLgn,$sPsw,$sSes,array $aDta){
