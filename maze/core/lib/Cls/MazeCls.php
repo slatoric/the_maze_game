@@ -45,8 +45,9 @@ class MazeCls
     }
     public function set_user(){
         $oUsr=new UserCls();
-        if(!$aDta=$oUsr->get_user()){
-            if($_REQUEST["aut"])$aDta=$oUsr->set_user(["dta_reg"=>date("Y-m-d H:i:s")]);
+        if(!$aDta=$oUsr->get_user_data()){
+            echo "<pre>aDta";var_dump($aDta);echo "</pre>";
+            if($_REQUEST["aut"])$aDta=$oUsr->set_user_data(["dta_reg"=>date("Y-m-d H:i:s")]);
             else $sAut=$oUsr->show_frm_aut();}
         $sHtm=$this->say_hi($aDta["lgn"]).$sAut;
         if(($aDta)and(!$this->oUsr))$this->oUser=$oUsr;

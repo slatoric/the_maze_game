@@ -134,7 +134,7 @@ class MapCls
         }
     }
     public function get_user(){
-        return ($this->oUser)?:null;
+        return $this->oUser;
     }
     public function get_user_pos(){
         return ($this->oUser)?$this->oUser->get_pos():null;

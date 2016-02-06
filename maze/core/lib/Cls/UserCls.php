@@ -40,11 +40,11 @@ class UserCls
         $bLgo=(!$_SESSION["lgn"])?:false;
         return $bLgo;
     }
-    public function get_user(){
-        return ($this->aDta)?:$this->aDta=UserFileCls4UserIfc::get_user($this->log_in(),$_REQUEST["psw"],session_id());
+    public function get_user_data(){
+        return ($this->aDta)?:$this->aDta=UserFileCls4UserIfc::get_user_data($this->log_in(),$_REQUEST["psw"],session_id());
     }
-    public function set_user(array $aDta){
-        return $this->aDta=UserFileCls4UserIfc::set_user($this->log_in(),$_REQUEST["psw"],session_id(),$aDta);
+    public function set_user_data(array $aDta){
+        return $this->aDta=UserFileCls4UserIfc::set_user_data($this->log_in(),$_REQUEST["psw"],session_id(),$aDta);
     }
     public function get_pos(){
         return $this->aPos;

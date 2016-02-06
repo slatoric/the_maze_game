@@ -3,15 +3,26 @@ namespace core\lib\cls;
 class UserFileCls4UserIfc implements \core\lib\ifc\UserIfc
 {
     const PTH="/db/usr/";
-    public static function get_user($sLgn,$sPsw,$sSes){
-        if((($sLgn)and($sPsw||$sSes))and(file_exists($sFnm=BDR.self::PTH.$sLgn)))
-            $aDta=unserialize(file_get_contents($sFnm));
-        if(($aDta["psw"]==md5($sPsw))or($aDta["ses"]==$sSes))$aDtr=$aDta;
-        return $aDtr;
+    public function t($sMsg){
+        return LngFileCls4LngIfc::t($sMsg);
     }
-    public static function set_user($sLgn,$sPsw,$sSes,array $aDta){
+    public static function get_user_data($sLgn,$sPsw,$sSes){
+        try{
+            if(!$sLgn)throw new ExcCls(self::t("No login"),ExcCls::INFO);
+            if(!$sPsw&&!$sSes)throw new ExcCls(self::t("No password and no session"),ExcCls::INFO);
+            if(!file_exists($sFnm=BDR.self::PTH.$sLgn))throw new ExcCls(self::t("No user file"),ExcCls::INFO);
+            $aDta=unserialize(file_get_contents($sFnm));
+            if((!password_verify($sPsw,$aDta["psw"]))and($aDta["ses"]!=$sSes))throw new ExcCls(self::t("No user permission"),ExcCls::INFO);
+            $aDtr=$aDta;}
+        catch(ExcCls $e){
+            $e->man();
+            throw $e;}
+        finally{
+            return $aDtr;}
+    }
+    public static function set_user_data($sLgn,$sPsw,$sSes,array $aDta){
         if(($sLgn)and($sPsw||$sSes)){
-            if($mDtw=self::get_user($sLgn,$sPsw,$sSes)){
+            if($mDtw=self::get_user_data($sLgn,$sPsw,$sSes)){
                 if(password_verify($sPsw,$mDtw["psw"]))
                     $sPswr=($aDta["psw_new"])?:$sPsw;
                 elseif(!$sPsw)$sPswr=$mDtw["psw"];
