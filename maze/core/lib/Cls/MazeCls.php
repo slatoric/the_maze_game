@@ -45,11 +45,17 @@ class MazeCls
     }
     public function init_user(){
         $oUsr=new UserCls();
-        if(!$aDta=$oUsr->get_user_data()){
-            echo "<pre>aDta";var_dump($aDta);echo "</pre>";
-            if($_REQUEST["aut"])$aDta=$oUsr->set_user_data(["dta_reg"=>date("Y-m-d H:i:s")]);
-            else $sAut=$oUsr->show_frm_aut();}
-        $sHtm=$this->say_hi($aDta["lgn"]).$sAut;
+        if(($sLgn=$oUsr->log_in())and($oUsr->is_user_data($sLgn))){
+            if(!$aDta=$oUsr->get_user_data($sLgn,$_REQUEST["psw"]))
+                $sAdd="<div class='mes_err'>{$this->t('No match password')}</div>{$oUsr->show_frm_aut()}";
+        }else{
+            if($_REQUEST["sub"]==$this->t("Register"))
+                $aDta=$oUsr->set_user_data($sLgn,$sPsw=$_REQUEST["psw"],["dt_reg"=>date("Y-m-d H:i:s"),"psw"=>password_hash($sPsw,PASSWORD_DEFAULT)]);
+            else{
+                $sMes=($sLgn)?"<div class='mes_err'>{$this->t('No match login')}</div>":"";
+                $sAdd=$sMes.$oUsr->show_frm_aut(($sLgn)?:false);}
+        }
+        $sHtm=$this->say_hi($aDta["lgn"]).$sAdd;
         if(($aDta)and(!$this->oUsr))$this->oUser=$oUsr;
         return $sHtm;
     }
