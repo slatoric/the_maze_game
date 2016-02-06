@@ -43,7 +43,7 @@ class MazeCls
             </form>";
         return $sHtm;
     }
-    public function set_user(){
+    public function init_user(){
         $oUsr=new UserCls();
         if(!$aDta=$oUsr->get_user_data()){
             echo "<pre>aDta";var_dump($aDta);echo "</pre>";

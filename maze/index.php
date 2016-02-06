@@ -28,7 +28,7 @@ echo "<pre>session_id";var_dump(session_id());echo "</pre>";
 $oTmg=new cls\MazeCls();
 echo "<pre>oTmg";var_dump($oTmg);echo "</pre>";
 
-echo $oTmg->set_user();
+echo $oTmg->init_user();
 if($oUsr=$oTmg->get_user()){
     echo "<pre>oUsr";var_dump($oUsr);echo "</pre>";
     }

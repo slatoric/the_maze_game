@@ -11,7 +11,7 @@ class UserCls
     public function t($sMsg){
         return LngFileCls4LngIfc::t($sMsg);
     }
-    public function show_frm_aut(){
+    public function show_frm_aut($bReg=false){
         $sMsg_hdr=$this->t("Please, log in to proceed.");
         $sMsg_lgn=$this->t("Login");
         $sMsg_psw=$this->t("Password");
@@ -41,9 +41,13 @@ class UserCls
         return $bLgo;
     }
     public function get_user_data(){
-        return ($this->aDta)?:$this->aDta=UserFileCls4UserIfc::get_user_data($this->log_in(),$_REQUEST["psw"],session_id());
+        
+        
+        
+        return ($this->aDta)?:$this->aDta=UserFileCls4UserIfc::get_user_data($this->log_in());
     }
     public function set_user_data(array $aDta){
+        
         return $this->aDta=UserFileCls4UserIfc::set_user_data($this->log_in(),$_REQUEST["psw"],session_id(),$aDta);
     }
     public function get_pos(){
