@@ -10,6 +10,26 @@ class MazeCls
     public function t($sMsg){
         return LngFileCls4LngIfc::t($sMsg);
     }
+    public function run(){
+        $sHtm=$this->init_user();
+        if($bUsr=$this->is_user()){
+            if($_REQUEST["do"]){
+                if($_REQUEST["act"]=="ext"){
+                    $this->oUser->log_out();
+                    unset($this->oUser);
+                    $sHtm=$this->init_user();
+                }elseif($_REQUEST["act"]=="gmn"){
+                    echo "new game";
+                }elseif($_REQUEST["act"]=="gmr"){
+                    echo "old game";
+                }elseif($_REQUEST["act"]=="set"){
+                    echo "settings";
+                }
+            }
+        }
+        echo $sHtm;
+        if($bUsr=$this->is_user())echo $this->show_menu_main();
+    }
     public function say_hi($sLgn=null){
         $sLgn=($sLgn)?:$this->t("User");
         $sHtm=$this->t("Welcome to The Maze Game").", $sLgn!";
@@ -25,7 +45,7 @@ class MazeCls
         $sHtm="
             <form name='frm_mnu_mn' action='' method='post'>
                 <div class='hdr'>{$sMsg_hdr}</div>
-                <div class='opt'><input type='radio' name='act' id='gnm' value='gnm'><label for='gnm'>{$sMsg_gmn}</label></div>
+                <div class='opt'><input type='radio' name='act' id='gmn' value='gmn'><label for='gmn'>{$sMsg_gmn}</label></div>
                 <div class='opt'><input type='radio' name='act' id='gmr' value='gmr'><label for='gmr'>{$sMsg_gmr}</label></div>
                 <div class='opt'><input type='radio' name='act' id='set' value='set'><label for='set'>{$sMsg_set}</label></div>
                 <div class='opt'><input type='radio' name='act' id='ext' value='ext'><label for='ext'>{$sMsg_ext}</label></div>
@@ -44,6 +64,7 @@ class MazeCls
         return $sHtm;
     }
     public function init_user(){
+        //2do: mes_err empty pass
         $oUsr=new UserCls();
         if(($sLgn=$oUsr->log_in())and($oUsr->is_user_data($sLgn))){
             if(!$aDta=$oUsr->get_user_data($sLgn,$_REQUEST["psw"]))
@@ -56,10 +77,12 @@ class MazeCls
                 $sAdd=$sMes.$oUsr->show_frm_aut(($sLgn)?:false);}
         }
         $sHtm=$this->say_hi($aDta["lgn"]).$sAdd;
-        if(($aDta)and(!$this->oUsr))$this->oUser=$oUsr;
+        if(($aDta)and(!$this->oUsr)){
+            if($aDta["ses"]!=$sSid=session_id())$aDta=$oUsr->set_user_data($sLgn,"",$aDta);
+            $this->oUser=$oUsr;}
         return $sHtm;
     }
-    public function get_user(){
-        return $this->oUser;
+    public function is_user(){
+        return ($this->oUser)?true:false;
     }
 }
