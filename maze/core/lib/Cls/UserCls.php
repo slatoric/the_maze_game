@@ -25,7 +25,7 @@ class UserCls
                 <div class='hdr'>{$sMsg_hdr}</div>
                 <div class='opt'><input type='text' name='lgn' value='{$sLgn}' pattern='[A-Za-z]{3,10}' alt='{$sMsg_lgn_tip}'><label for='lgn'>{$sMsg_lgn}</label></div>
                 <div class='opt'><input type='password' name='psw' value='{$sPsw}' pattern='[A-Za-z\d]{6,10}' alt='{$sMsg_psw_tip}'><label for='psw'>{$sMsg_psw}</label></div>
-                <div class='sub'><input type='submit' name='sub' value='{$sMsg_sub}'></div>
+                <div class='sub'><input type='submit' name='aut' value='{$sMsg_sub}'></div>
             </form>
             <div class='mes_inf'>".implode("<br>",[$sMsg_lgn_tip,$sMsg_psw_tip])."</div>";
         return $sHtm;
@@ -36,9 +36,7 @@ class UserCls
         return $sLgn;
     }
     public function log_in(){
-        $sLgn=($_REQUEST["lgn"])?:$_SESSION["lgn"];
-        if($_REQUEST["lgn"]&&$_REQUEST["psw"])$sLgn=$_REQUEST["lgn"];
-        else $sLgn=$_SESSION["lgn"];
+        $sLgn=(isset($_REQUEST["lgn"]))?$_REQUEST["lgn"]:$_SESSION["lgn"];
         if(($sLgn)and((!$_SESSION["lgn"])or($_SESSION["lgn"]!=$sLgn)))$_SESSION["lgn"]=$sLgn;
         return $sLgn;
     }
@@ -66,8 +64,8 @@ class UserCls
                 if(!$sLgn)throw new ExcCls("No login",ExcCls::DEBUG);
                 if((!$sPsw)and(!$sSid=session_id()))throw new ExcCls("No password or session",ExcCls::DEBUG);
                 if(!$aDta=$sCls4UserIfc::get_user_data($sLgn))throw new ExcCls("No read login data",ExcCls::DEBUG);
+                if($sPsw&&!password_verify($sPsw,$aDta["psw"]))throw new ExcCls("No match password",ExcCls::DEBUG);
                 if((!$sPsw)and($aDta["ses"]!=$sSid))throw new ExcCls("No match session",ExcCls::DEBUG);
-                if(($sPsw)and(!password_verify($sPsw,$aDta["psw"])))throw new ExcCls("No match password",ExcCls::DEBUG);
                 $this->aDta=$aDtr=$aDta;}
         }catch(ExcCls $eExc){
             $eExc->man();
@@ -82,10 +80,10 @@ class UserCls
             if(!$sSid=session_id())throw new ExcCls("No session",ExcCls::DEBUG);
             if(!$aDta)throw new ExcCls("No login data",ExcCls::DEBUG);
             if(!$sPsh=$aDta["psw"])throw new ExcCls("No password hash",ExcCls::DEBUG);
+            if($sPsw&&!password_verify($sPsw,$sPsh))throw new ExcCls("No match password",ExcCls::DEBUG);
             if(!$aDta["dt_reg"])throw new ExcCls("No registration date",ExcCls::DEBUG);
             if($sPswn=$aDta["new_psw"]){
                 if(!$sPsw)throw new ExcCls("No password",ExcCls::DEBUG);
-                if(!password_verify($sPsw,$sPsh))throw new ExcCls("No match password",ExcCls::DEBUG);
                 $aDta["psw"]=password_hash($sPswn,PASSWORD_DEFAULT);}
             $aDta["lgn"]=$sLgn;
             $aDta["ses"]=$sSid;

@@ -11,24 +11,58 @@ class MazeCls
         return LngFileCls4LngIfc::t($sMsg);
     }
     public function run(){
+        //$sHtm=$this->init_user();
+        echo "starting";
+        if($_REQUEST["do"]){
+            if($_REQUEST["act"]=="ext"){
+                echo "exiting";
+                $bLgo=UserCls::log_out();
+                echo "<pre>bLgo";var_dump($bLgo);echo "</pre>";
+            }elseif($_REQUEST["act"]=="gmn"){
+                echo "new game";
+            }elseif($_REQUEST["act"]=="gmr"){
+                echo "old game";
+            }elseif($_REQUEST["act"]=="set"){
+                echo "settings";
+            }
+        }
+        echo "user init";
         $sHtm=$this->init_user();
-        if($bUsr=$this->is_user()){
-            if($_REQUEST["do"]){
-                if($_REQUEST["act"]=="ext"){
-                    $this->oUser->log_out();
-                    unset($this->oUser);
-                    $sHtm=$this->init_user();
-                }elseif($_REQUEST["act"]=="gmn"){
-                    echo "new game";
-                }elseif($_REQUEST["act"]=="gmr"){
-                    echo "old game";
-                }elseif($_REQUEST["act"]=="set"){
-                    echo "settings";
+        echo $sHtm;
+        if($bUsr=$this->is_user())echo $this->show_menu_main();
+    }
+    public function init_user(){
+        $oUsr=new UserCls();
+        $sLgn=$oUsr->log_in();
+        if($sAut=$_REQUEST["aut"]){
+            if(!$sLgn){
+                $aErr[]=$this->t('No login');
+                $bFmd=false;//enter mode
+            }else{
+                if(!$oUsr->is_user_data($sLgn)and($sAut==$this->t("Enter"))){
+                    $aErr[]=$this->t('No match login');
+                    $bFmd=true;//register mode
+                }elseif((!$sPsw=$_REQUEST["psw"])or(($oUsr->is_user_data($sLgn))and(!$aDta=$oUsr->get_user_data($sLgn,$sPsw)))){//empty or wrong pass
+                    $aErr[]=$this->t('No match password');
+                    $bFmd=false;//enter mode
                 }
             }
         }
-        echo $sHtm;
-        if($bUsr=$this->is_user())echo $this->show_menu_main();
+        if(!$aErr){
+            if($sAut==$this->t("Register"))$aDta=$oUsr->set_user_data($sLgn,$sPsw=$_REQUEST["psw"],["dt_reg"=>date("Y-m-d H:i:s"),"psw"=>password_hash($sPsw,PASSWORD_DEFAULT)]);
+            else $aDta=$oUsr->get_user_data($sLgn,$sPsw);
+        }
+        $sHtm=$this->say_hi($aDta["lgn"]);
+        if($aErr)$sHtm.="<div class='mes_err'>".implode("<br>",$aErr)."</div>";
+        if(!$aDta&&!isset($bFmd))$bFmd=false;//enter mode by default
+        if(isset($bFmd))$sHtm.=$oUsr->show_frm_aut($bFmd);
+        if(($aDta)and(!$this->oUsr)){
+            if($aDta["ses"]!=$sSid=session_id())$aDta=$oUsr->set_user_data($sLgn,"",$aDta);
+            $this->oUser=$oUsr;}
+        return $sHtm;
+    }
+    public function is_user(){
+        return ($this->oUser)?true:false;
     }
     public function say_hi($sLgn=null){
         $sLgn=($sLgn)?:$this->t("User");
@@ -62,27 +96,5 @@ class MazeCls
                 <div class='sub'><input type='submit' name='2mn' value='{$sMsg_sub}'></div>
             </form>";
         return $sHtm;
-    }
-    public function init_user(){
-        //2do: mes_err empty pass
-        $oUsr=new UserCls();
-        if(($sLgn=$oUsr->log_in())and($oUsr->is_user_data($sLgn))){
-            if(!$aDta=$oUsr->get_user_data($sLgn,$_REQUEST["psw"]))
-                $sAdd="<div class='mes_err'>{$this->t('No match password')}</div>{$oUsr->show_frm_aut()}";
-        }else{
-            if($_REQUEST["sub"]==$this->t("Register"))
-                $aDta=$oUsr->set_user_data($sLgn,$sPsw=$_REQUEST["psw"],["dt_reg"=>date("Y-m-d H:i:s"),"psw"=>password_hash($sPsw,PASSWORD_DEFAULT)]);
-            else{
-                $sMes=($sLgn)?"<div class='mes_err'>{$this->t('No match login')}</div>":"";
-                $sAdd=$sMes.$oUsr->show_frm_aut(($sLgn)?:false);}
-        }
-        $sHtm=$this->say_hi($aDta["lgn"]).$sAdd;
-        if(($aDta)and(!$this->oUsr)){
-            if($aDta["ses"]!=$sSid=session_id())$aDta=$oUsr->set_user_data($sLgn,"",$aDta);
-            $this->oUser=$oUsr;}
-        return $sHtm;
-    }
-    public function is_user(){
-        return ($this->oUser)?true:false;
     }
 }
