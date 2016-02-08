@@ -2,60 +2,62 @@
 namespace core\lib\cls;
 class MazeCls
 {
+    use \core\lib\trt\LngTrt;//to send multilingual messages to user
     private $oMap;
     private $oUser;
     function __construct(){
         
     }
-    public function t($sMsg){
-        return LngFileCls4LngIfc::t($sMsg);
-    }
     public function run(){
         if($_REQUEST["do"]){
             if($_REQUEST["act"]=="ext"){
                 if($bLgo=UserCls::log_out())
-                    $aInf[]=$this->t("User successfully exited");
-            }elseif($_REQUEST["act"]=="del"){
-                if($bDel=UserCls::del_user_data(UserCls::log_in())){
-                    $aInf[]=$this->t("User successfully deleted");
-                    $bLgo=UserCls::log_out();
-                }
+                    $aInf[]=self::t("User successfully exited");
             }elseif($_REQUEST["act"]=="gmn"){
                 echo "new game";
             }elseif($_REQUEST["act"]=="gmr"){
                 echo "old game";
             }elseif($_REQUEST["act"]=="set"){
                 echo "settings";
+            }else{
+                $aInfm[]=self::t("Please, select action");
             }
         }
+        $sSel=self::show_lng_sel();
+        echo "<pre>sSel";var_dump($sSel);echo "</pre>";
+        exit;
         echo $this->init_user($aInf);
-        if($bUsr=$this->is_user())echo $this->show_menu_main();
+        if($bUsr=$this->is_user())echo self::show_menu_main($aInfm);
     }
     public function init_user(array $aInf=null){
         $oUsr=new UserCls();
-        $sLgn=$oUsr->log_in();
+        $sLgn=UserCls::log_in();
         if($sAut=$_REQUEST["aut"]){
             if(!$sLgn){
-                $aErr[]=$this->t('No login');
+                $aErr[]=self::t('No login');
                 $bFmd=false;//enter mode
             }else{
-                if(!$oUsr->is_user_data($sLgn)and($sAut==$this->t("Enter"))){
-                    $aErr[]=$this->t('No match login');
+                if(!UserCls::is_user_data($sLgn)and($sAut==self::t("Enter"))){
+                    $aErr[]=self::t('No match login');
                     $bFmd=true;//register mode
-                }elseif((!$sPsw=$_REQUEST["psw"])or(($oUsr->is_user_data($sLgn))and(!$aDta=$oUsr->get_user_data($sLgn,$sPsw)))){//empty or wrong pass
-                    $aErr[]=$this->t('No match password');
-                    $bFmd=(($sAut!=$this->t("Enter"))&&(!$oUsr->is_user_data($sLgn)))?:false;//check mode
+                }elseif((!$sPsw=$_REQUEST["psw"])or((UserCls::is_user_data($sLgn))and(!$aDta=$oUsr->get_user_data($sLgn,$sPsw)))){//empty or wrong pass
+                    $aErr[]=self::t('No match password');
+                    $bFmd=(($sAut!=self::t("Enter"))&&(!UserCls::is_user_data($sLgn)))?:false;//check mode
                 }
             }
         }
         if(!$aErr){
-            if($sAut==$this->t("Register"))$aDta=$oUsr->set_user_data($sLgn,$sPsw=$_REQUEST["psw"],["dt_reg"=>date("Y-m-d H:i:s"),"psw"=>password_hash($sPsw,PASSWORD_DEFAULT)]);
+            if($sAut==self::t("Register"))$aDta=$oUsr->set_user_data($sLgn,$sPsw=$_REQUEST["psw"],["dt_reg"=>date("Y-m-d H:i:s"),"psw"=>password_hash($sPsw,PASSWORD_DEFAULT)]);
             else $aDta=$oUsr->get_user_data($sLgn,$sPsw);
         }
-        $sHtm=$this->say_hi($aDta["lgn"]);
+        $sHtm=self::say_hi($aDta["lgn"]);
         if($aErr)$sHtm.="<div class='mes_err'>".implode("<br>",$aErr)."</div>";
         if(!$aDta&&!isset($bFmd))$bFmd=false;//enter mode by default
-        if(isset($bFmd))$sHtm.=$oUsr->show_frm_aut($bFmd,$aInf);
+        if(isset($bFmd)){
+            $s=UserCls::set_sCls4LngIfc(__NAMESPACE__."\\".LngMysqlCls4LngIfc);
+            echo "<pre>s";var_dump($s);echo "</pre>";
+            $sHtm.=UserCls::show_frm_aut($bFmd,$aInf);
+        }
         if(($aDta)and(!$this->oUsr)){
             if($aDta["ses"]!=$sSid=session_id())$aDta=$oUsr->set_user_data($sLgn,"",$aDta);
             $this->oUser=$oUsr;}
@@ -64,34 +66,38 @@ class MazeCls
     public function is_user(){
         return ($this->oUser)?true:false;
     }
-    public function say_hi($sLgn=null){
-        $sLgn=($sLgn)?:$this->t("User");
-        $sHtm=$this->t("Welcome to The Maze Game").", $sLgn!";
+    public static function say_hi($sLgn=null){
+        $sLgn=($sLgn)?:self::t("User");
+        $sHtm=self::t("Welcome to The Maze Game").", $sLgn!";
         return $sHtm;
     }
-    public function show_menu_main(){
-        $sMsg_hdr=$this->t("Main menu");
-        $sMsg_gmn=$this->t("Play new game");
-        $sMsg_gmr=$this->t("Resume saved game");
-        $sMsg_set=$this->t("Customize");
-        $sMsg_del=$this->t("Delete user");
-        $sMsg_ext=$this->t("Exit");
-        $sMsg_sub=$this->t("Apply");
+    public function show_lng_sel(){
+        $sSel=self::show_sel("lng");
+        return $sSel;
+    }
+    public static function show_menu_main(array $aInf=null){
+        $sMsg_hdr=self::t("Main menu");
+        $sMsg_gmn=self::t("Play new game");
+        $sMsg_gmr=self::t("Resume saved game");
+        $sMsg_set=self::t("Customize");
+        $sMsg_ext=self::t("Exit");
+        $sMsg_sub=self::t("Apply");
+        $aTps=[$sMsg_lgn_tip,$sMsg_psw_tip];
+        $sInf=($aInf)?"<div class='mes_inf'>".implode("<br>",$aInf)."</div>":"";
         $sHtm="
             <form name='frm_mnu_mn' action='' method='post'>
                 <div class='hdr'>{$sMsg_hdr}</div>
                 <div class='opt'><input type='radio' name='act' id='gmn' value='gmn'><label for='gmn'>{$sMsg_gmn}</label></div>
                 <div class='opt'><input type='radio' name='act' id='gmr' value='gmr'><label for='gmr'>{$sMsg_gmr}</label></div>
                 <div class='opt'><input type='radio' name='act' id='set' value='set'><label for='set'>{$sMsg_set}</label></div>
-                <div class='opt'><input type='radio' name='act' id='del' value='del'><label for='del'>{$sMsg_del}</label></div>
                 <div class='opt'><input type='radio' name='act' id='ext' value='ext'><label for='ext'>{$sMsg_ext}</label></div>
                 <div class='sub'><input type='submit' name='do' value='{$sMsg_sub}'></div>
-            </form>";
+            </form>{$sInf}";
         return $sHtm;
     }
-    public function show_menu_game(){
-        $sMsg_hdr=$this->t("Game menu");
-        $sMsg_sub=$this->t("Main menu");
+    public static function show_menu_game(){
+        $sMsg_hdr=self::t("Game menu");
+        $sMsg_sub=self::t("Main menu");
         $sHtm="
             <form name='frm_mnu_gm' action='' method='post'>
                 <div class='hdr'>{$sMsg_hdr}</div>

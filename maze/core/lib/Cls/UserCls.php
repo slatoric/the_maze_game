@@ -2,6 +2,7 @@
 namespace core\lib\cls;
 class UserCls
 {
+    use \core\lib\trt\LngTrt;
     private static $sCls4UserIfc=__NAMESPACE__."\\".UserFileCls4UserIfc;
     private $aPos;
     private $aHis;//history
@@ -9,16 +10,13 @@ class UserCls
     function __construct(){
         
     }
-    public function t($sMsg){
-        return LngFileCls4LngIfc::t($sMsg);
-    }
-    public function show_frm_aut($bReg=false,array $aInf=null){
-        $sMsg_hdr=($bReg)?$this->t("Please, register"):$this->t("Please, log in");
-        $sMsg_lgn=$this->t("Login");
-        $sMsg_psw=$this->t("Password");
-        $sMsg_lgn_tip=$this->t("Login must have from 3 to 10 english simbols");
-        $sMsg_psw_tip=$this->t("Password must have from 6 to 10 english simbols and/or digits");
-        $sMsg_sub=($bReg)?$this->t("Register"):$this->t("Enter");
+    public static function show_frm_aut($bReg=false,array $aInf=null){
+        $sMsg_hdr=($bReg)?self::t("Please, register"):self::t("Please, log in");
+        $sMsg_lgn=self::t("Login");
+        $sMsg_psw=self::t("Password");
+        $sMsg_lgn_tip=self::t("Login must have from 3 to 10 english simbols");
+        $sMsg_psw_tip=self::t("Password must have from 6 to 10 english simbols and/or digits");
+        $sMsg_sub=($bReg)?self::t("Register"):self::t("Enter");
         $sLgn=self::log_in();
         $aTps=[$sMsg_lgn_tip,$sMsg_psw_tip];
         $aInf=($aInf)?array_merge($aInf,$aTps):$aTps;
@@ -37,17 +35,17 @@ class UserCls
         $aDta=$oUsr->get_data();
         return $sLgn;
     }
-    public function log_in(){
+    public static function log_in(){
         $sLgn=(isset($_REQUEST["lgn"]))?$_REQUEST["lgn"]:$_SESSION["lgn"];
         if(($sLgn)and((!$_SESSION["lgn"])or($_SESSION["lgn"]!=$sLgn)))$_SESSION["lgn"]=$sLgn;
         return $sLgn;
     }
-    public function log_out(){
+    public static function log_out(){
         unset($_SESSION["lgn"]);
         $bLgo=(!$_SESSION["lgn"])?:false;
         return $bLgo;
     }
-    public function is_user_data($sLgn){
+    public static function is_user_data($sLgn){
         try{
             if(!class_exists($sCls4UserIfc=self::$sCls4UserIfc))throw new ExcCls("No class for user interface",ExcCls::DEBUG);
             if(!$sLgn)throw new ExcCls("No login",ExcCls::DEBUG);
