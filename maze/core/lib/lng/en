@@ -1,19 +1,22 @@
-Welcome to The Maze Game
 Register
-Please, log in.
-Login
-Password
-Enter
-User
-No match login
-Please, register.
-No match password
+Welcome to The Maze Game
 Main menu
 Play new game
 Resume saved game
 Customize
+Delete user
 Exit
 Apply
+User
+Please, log in
+Login
+Password
 Login must have from 3 to 10 english simbols
 Password must have from 6 to 10 english simbols and/or digits
+Enter
+User successfully exited
+No match login
+Please, register
+No match password
+User successfully deleted
 No login
