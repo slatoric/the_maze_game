@@ -9,6 +9,7 @@ class MazeCls
         
     }
     public function run(){
+        echo $sSel=self::show_lng_sel();
         if($_REQUEST["do"]){
             if($_REQUEST["act"]=="ext"){
                 if($bLgo=UserCls::log_out())
@@ -23,14 +24,12 @@ class MazeCls
                 $aInfm[]=self::t("Please, select action");
             }
         }
-        $sSel=self::show_lng_sel();
-        echo "<pre>sSel";var_dump($sSel);echo "</pre>";
-        exit;
         echo $this->init_user($aInf);
         if($bUsr=$this->is_user())echo self::show_menu_main($aInfm);
     }
     public function init_user(array $aInf=null){
         $oUsr=new UserCls();
+        UserCls::set_lng(self::$sLng);
         $sLgn=UserCls::log_in();
         if($sAut=$_REQUEST["aut"]){
             if(!$sLgn){
@@ -53,12 +52,9 @@ class MazeCls
         $sHtm=self::say_hi($aDta["lgn"]);
         if($aErr)$sHtm.="<div class='mes_err'>".implode("<br>",$aErr)."</div>";
         if(!$aDta&&!isset($bFmd))$bFmd=false;//enter mode by default
-        if(isset($bFmd)){
-            $s=UserCls::set_sCls4LngIfc(__NAMESPACE__."\\".LngMysqlCls4LngIfc);
-            echo "<pre>s";var_dump($s);echo "</pre>";
+        if(isset($bFmd))
             $sHtm.=UserCls::show_frm_aut($bFmd,$aInf);
-        }
-        if(($aDta)and(!$this->oUsr)){
+        if(($aDta)and(!$this->oUser)){
             if($aDta["ses"]!=$sSid=session_id())$aDta=$oUsr->set_user_data($sLgn,"",$aDta);
             $this->oUser=$oUsr;}
         return $sHtm;
@@ -71,9 +67,19 @@ class MazeCls
         $sHtm=self::t("Welcome to The Maze Game").", $sLgn!";
         return $sHtm;
     }
-    public function show_lng_sel(){
-        $sSel=self::show_sel("lng");
-        return $sSel;
+    public static function show_lng_sel(){
+        $sLng=(isset($_REQUEST["lng"]))?$_REQUEST["lng"]:$_SESSION["lng"];
+        if(($sLng)and((!$_SESSION["lng"])or($_SESSION["lng"]!=$sLng)))$_SESSION["lng"]=$sLng;
+        self::set_lng($sLng);
+        if($sSel=self::show_sel("lng",$sLng)){
+            $sMsg_lng=self::t("Language");
+            $sMsg_sub=self::t("Change");
+            $sHtm="
+                <form name='frm_lng' action='' method='post'>
+                    <div class='opt sub'>{$sSel}<label for='gmn'>{$sMsg_gmn}</label><input type='submit' name='lng_cng' value='{$sMsg_sub}'></div>
+                </form>";
+            }
+        return $sHtm;
     }
     public static function show_menu_main(array $aInf=null){
         $sMsg_hdr=self::t("Main menu");
