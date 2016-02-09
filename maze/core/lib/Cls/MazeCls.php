@@ -9,7 +9,7 @@ class MazeCls
         
     }
     public function run(){
-        echo $sSel=self::show_lng_sel();
+        self::set_lng();
         if($_REQUEST["do"]){
             if($_REQUEST["act"]=="ext"){
                 if($bLgo=UserCls::log_out())
@@ -25,7 +25,10 @@ class MazeCls
             }
         }
         echo $this->init_user($aInf);
-        if($bUsr=$this->is_user())echo self::show_menu_main($aInfm);
+        if($bUsr=$this->is_user())
+            echo self::show_menu_main($aInfm);
+        else
+            echo $sSel=self::show_lng_sel();//language selector
     }
     public function init_user(array $aInf=null){
         $oUsr=new UserCls();
@@ -68,10 +71,7 @@ class MazeCls
         return $sHtm;
     }
     public static function show_lng_sel(){
-        $sLng=(isset($_REQUEST["lng"]))?$_REQUEST["lng"]:$_SESSION["lng"];
-        if(($sLng)and((!$_SESSION["lng"])or($_SESSION["lng"]!=$sLng)))$_SESSION["lng"]=$sLng;
-        self::set_lng($sLng);
-        if($sSel=self::show_sel("lng",$sLng)){
+        if($sSel=self::show_sel("lng",self::set_lng())){
             $sMsg_lng=self::t("Language");
             $sMsg_sub=self::t("Change");
             $sHtm="

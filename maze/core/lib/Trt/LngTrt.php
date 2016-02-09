@@ -52,12 +52,14 @@ trait LngTrt
             throw $eExc;
         }finally{
             return $sSel;}
-        return $sLng;
     }
-    public static function set_lng($sLng){
+    public static function set_lng($sLng=null){
         try{
             if(!class_exists($sCls4LngIfc=self::$sCls4LngIfc))throw new ExcCls("No class for language interface",ExcCls::DEBUG);
-            $sLng=self::$sLng=($sLng)?:$sCls4LngIfc::$sLngDef;
+            $sLng=($sLng)?:$_REQUEST["lng"];
+            $sLng=($sLng)?:$_SESSION["lng"];
+            if(($sLng)and((!$_SESSION["lng"])or($_SESSION["lng"]!=$sLng)))$_SESSION["lng"]=$sLng;
+            $sLng=self::$sLng=($sLng)?:$sCls4LngIfc::LNG_DEF;
         }catch(ExcCls $eExc){
             $eExc->man();
             throw $eExc;

@@ -4,19 +4,18 @@ class LngFileCls4LngIfc implements \core\lib\ifc\LngIfc
 {
     const PTH="/core/lib/lng/";
     const LNG_DEF="en";
-    private static $sLngDef=self::LNG_DEF;
     private static $sLng;
     public static function t($sMsg,$sLng=null){
         try{
             if(!$sMsg)throw new ExcCls("No message",ExcCls::DEBUG);
-            self::$sLng=($sLng)?:self::$sLngDef;
+            self::$sLng=($sLng)?:self::LNG_DEF;
             if(!file_exists($sFnm=BDR.self::PTH.self::$sLng))//try to create language file
                 if(!self::set_ln(self::$sLng,"wb"))throw new ExcCls("No create language file",ExcCls::DEBUG);
             if(!file_exists($sFnm))throw new ExcCls("No language file",ExcCls::DEBUG);
             if(!$sFct=file_get_contents($sFnm))throw new ExcCls("No read language file",ExcCls::DEBUG);
             if(strpos($sFct,$sMsg)===false){//try to append new message
-                if(!self::set_ln("$sMsg\n","ab"))throw new ExcCls("No append language file",ExcCls::DEBUG);
-            }elseif(self::$sLng!=self::$sLngDef){//message found
+                if(!self::set_ln($sMsg,"ab"))throw new ExcCls("No append language file",ExcCls::DEBUG);
+            }elseif(self::$sLng!=self::LNG_DEF){//message found
                 if(!$aLns=file($sFnm,FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES))throw new ExcCls("No array language file",ExcCls::DEBUG);
                 foreach($aLns as $sLn){
                     if(!$aLn=self::tln($sLn))throw new ExcCls("No parse line",ExcCls::DEBUG);
@@ -37,8 +36,8 @@ class LngFileCls4LngIfc implements \core\lib\ifc\LngIfc
         try{
             if(!$sLn)throw new ExcCls("No line",ExcCls::DEBUG);
             if(!$sMd)throw new ExcCls("No mode",ExcCls::DEBUG);
-            if(!$mF=fopen($sFnm,$sMd))throw new ExcCls("No open language file",ExcCls::DEBUG);
-            if(!$bWrt=fwrite($mF,self::$sLng."\n"))throw new ExcCls("No write language file",ExcCls::DEBUG);
+            if(!$mF=fopen(BDR.self::PTH.self::$sLng,$sMd))throw new ExcCls("No open language file",ExcCls::DEBUG);
+            if(!$bWrt=fwrite($mF,"$sLn\n"))throw new ExcCls("No write language file",ExcCls::DEBUG);
             if(!$bCls=fclose($mF))throw new ExcCls("No close language file",ExcCls::DEBUG);
         }catch(ExcCls $eExc){
             $eExc->man();
@@ -76,7 +75,7 @@ class LngFileCls4LngIfc implements \core\lib\ifc\LngIfc
         return self::$sLng;
     }
     public static function set_lng($sLng){
-        self::$sLng=($sLng)?:self::$sLngDef;
+        self::$sLng=($sLng)?:self::LNG_DEF;
         return self::$sLng=$sLng;
     }
     public static function get_lngs(){
