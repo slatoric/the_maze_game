@@ -18,7 +18,7 @@ class JoysCls
     public function set_dir(array $aDrs=null){
         $this->aDrs=$aDrs;
     }
-    public function draw_joy(){
+    public function show_joy(){
         $sUpd=$sDnd=$sLtd=$sRtd=" disabled='disabled'";
         if($aDrs=$this->aDrs){
             if(in_array(0,$aDrs))$sUpd="";

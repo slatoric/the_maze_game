@@ -3,7 +3,7 @@ namespace core\lib\cls;
 class UserFileCls4UserIfc implements \core\lib\ifc\UserIfc
 {
     const PTH="/db/usr/";
-    public static function is_user_data($sLgn){
+    public static function is_usr_dta($sLgn){
         try{
             if(!$sLgn)throw new ExcCls("No login",ExcCls::DEBUG);
             if(!$bF=file_exists(BDR.self::PTH.$sLgn))throw new ExcCls("No login file",ExcCls::DEBUG);
@@ -13,9 +13,9 @@ class UserFileCls4UserIfc implements \core\lib\ifc\UserIfc
         }finally{
             return $bF;}
     }
-    public static function get_user_data($sLgn){
+    public static function get_usr_dta($sLgn){
         try{
-            if(self::is_user_data($sLgn)){
+            if(self::is_usr_dta($sLgn)){
                 if(!$sF=file_get_contents(BDR.self::PTH.$sLgn))throw new ExcCls("No read login file",ExcCls::DEBUG);
                 if(!$aDta=unserialize($sF))throw new ExcCls("No unserialize login data",ExcCls::DEBUG);
             }
@@ -25,7 +25,7 @@ class UserFileCls4UserIfc implements \core\lib\ifc\UserIfc
         }finally{
             return $aDta;}
     }
-    public static function set_user_data($sLgn,array $aDta){
+    public static function set_usr_dta($sLgn,array $aDta){
         try{
             if(!$sLgn)throw new ExcCls("No login",ExcCls::DEBUG);
             if(!$aDta)throw new ExcCls("No login data",ExcCls::DEBUG);
@@ -39,7 +39,7 @@ class UserFileCls4UserIfc implements \core\lib\ifc\UserIfc
         }finally{
             return $bWrt;}
     }
-    public static function del_user_data($sLgn){
+    public static function del_usr_dta($sLgn){
         try{
             if(!$sLgn)throw new ExcCls("No login",ExcCls::DEBUG);
             if(!$rF=fopen($sFnm=BDR.self::PTH.$sLgn,"r"))throw new ExcCls("No open login file",ExcCls::DEBUG);

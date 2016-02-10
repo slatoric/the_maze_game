@@ -2,5 +2,5 @@
 namespace core\lib\ifc;
 interface MapIfc
 {
-    public function draw(array $aMap);
+    public static function show_map(array $aMap);
 }

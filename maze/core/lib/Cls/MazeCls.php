@@ -4,7 +4,7 @@ class MazeCls
 {
     use \core\lib\trt\LngTrt;//to send multilingual messages to user
     private $oMap;
-    private $oUser;
+    private $oUsr;
     function __construct(){
         
     }
@@ -15,18 +15,22 @@ class MazeCls
                 if($bLgo=UserCls::log_out())
                     $aInf[]=self::t("User successfully exited");
             }elseif($_REQUEST["act"]=="gmn"){
-                echo "new game";
+                $bGmn=true;
             }elseif($_REQUEST["act"]=="gmr"){
                 echo "old game";
             }elseif($_REQUEST["act"]=="set"){
-                echo "settings";
+                $sHtm=UserCls::show_settings();
             }else{
                 $aInfm[]=self::t("Please, select action");
             }
         }
         echo $this->init_user($aInf);
-        if($bUsr=$this->is_user())
-            echo self::show_menu_main($aInfm);
+        if($bUsr=$this->is_user()){
+            if($bGmn)echo $this->new_map();
+            else echo ($sHtm)?:self::show_menu_main($aInfm);
+            
+            }
+            
         else
             echo $sSel=self::show_lng_sel();//language selector
     }
@@ -42,7 +46,7 @@ class MazeCls
                 if(!UserCls::is_user_data($sLgn)and($sAut==self::t("Enter"))){
                     $aErr[]=self::t('No match login');
                     $bFmd=true;//register mode
-                }elseif((!$sPsw=$_REQUEST["psw"])or((UserCls::is_user_data($sLgn))and(!$aDta=$oUsr->get_user_data($sLgn,$sPsw)))){//empty or wrong pass
+                }elseif((!$sPsw=$_REQUEST["psw"])or((UserCls::is_user_data($sLgn))and(!$aDta=$oUsr->get_usr_dta($sLgn,$sPsw)))){//empty or wrong pass
                     $aErr[]=self::t('No match password');
                     $bFmd=(($sAut!=self::t("Enter"))&&(!UserCls::is_user_data($sLgn)))?:false;//check mode
                 }
@@ -50,20 +54,20 @@ class MazeCls
         }
         if(!$aErr){
             if($sAut==self::t("Register"))$aDta=$oUsr->set_user_data($sLgn,$sPsw=$_REQUEST["psw"],["dt_reg"=>date("Y-m-d H:i:s"),"psw"=>password_hash($sPsw,PASSWORD_DEFAULT)]);
-            else $aDta=$oUsr->get_user_data($sLgn,$sPsw);
+            else $aDta=$oUsr->get_usr_dta($sLgn,$sPsw);
         }
         $sHtm=self::say_hi($aDta["lgn"]);
         if($aErr)$sHtm.="<div class='mes_err'>".implode("<br>",$aErr)."</div>";
         if(!$aDta&&!isset($bFmd))$bFmd=false;//enter mode by default
         if(isset($bFmd))
             $sHtm.=UserCls::show_frm_aut($bFmd,$aInf);
-        if(($aDta)and(!$this->oUser)){
+        if(($aDta)and(!$this->oUsr)){
             if($aDta["ses"]!=$sSid=session_id())$aDta=$oUsr->set_user_data($sLgn,"",$aDta);
-            $this->oUser=$oUsr;}
+            $this->oUsr=$oUsr;}
         return $sHtm;
     }
     public function is_user(){
-        return ($this->oUser)?true:false;
+        return ($this->oUsr)?true:false;
     }
     public static function say_hi($sLgn=null){
         $sLgn=($sLgn)?:self::t("User");
@@ -109,6 +113,42 @@ class MazeCls
                 <div class='hdr'>{$sMsg_hdr}</div>
                 <div class='sub'><input type='submit' name='2mn' value='{$sMsg_sub}'></div>
             </form>";
+        return $sHtm;
+    }
+    public function new_map(){
+        $aMap=[
+[1,0,1,1,1,1,1,1,1],
+[1,0,0,0,0,0,0,0,1],
+[1,1,1,1,1,1,1,0,1],
+[1,0,0,0,0,0,0,0,1],
+[1,0,1,1,0,1,1,1,1],
+[1,0,0,1,0,0,0,0,1],
+[1,1,1,1,1,1,1,0,1],
+[1,0,0,0,0,0,0,0,1],
+[1,1,1,1,0,1,1,1,1],
+];
+        $oMap=new MapCls($aMap);
+        //echo "<pre>";var_dump($oMap);echo "</pre>";
+        $bVis=$oMap->set_vis(false);
+        //echo "<pre>bVis";var_dump($bVis);echo "</pre>";
+        $aEnt=$oMap->get_ent();
+        //echo "<pre>aEnt";var_dump($aEnt);echo "</pre>";
+        $aExt=$oMap->get_ext();
+        //echo "<pre>aExt";var_dump($aExt);echo "</pre>";
+        $bUsr=$oMap->set_usr($this->oUsr);
+        //echo "<pre>bUsr";var_dump($bUsr);echo "</pre>";
+        $sHtm="<br>".$oMap->show_map();
+        //echo "<pre>oMap";var_dump($oMap);echo "</pre>";
+        
+        $bUsr=$oMap->set_usr($this->oUsr,MapCls::UP);
+        echo "<pre>bUsr";var_dump($bUsr);echo "</pre>";
+        $sHtm="<br>".$oMap->show_map();
+        exit;
+        $oJoy=new JoysCls([0,2,4,6]);
+        //echo "<pre>oJoy";var_dump($oJoy);echo "</pre>";
+        $sHtm.=$oJoy->show_joy();
+        //echo $sHtm;
+        echo $oJoy->get_dir();
         return $sHtm;
     }
 }

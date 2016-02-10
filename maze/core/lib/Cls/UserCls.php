@@ -23,14 +23,28 @@ class UserCls
         $sHtm="
             <form name='frm_usr' action='' method='post'>
                 <div class='hdr'>{$sMsg_hdr}</div>
-                <div class='opt'><input type='text' name='lgn' value='{$sLgn}' pattern='[A-Za-z]{3,10}' alt='{$sMsg_lgn_tip}'><label for='lgn'>{$sMsg_lgn}</label></div>
-                <div class='opt'><input type='password' name='psw' value='{$sPsw}' pattern='[A-Za-z\d]{6,10}' alt='{$sMsg_psw_tip}'><label for='psw'>{$sMsg_psw}</label></div>
+                <div class='opt'><input type='text' name='lgn' value='{$sLgn}' pattern='[A-Za-z]{3,10}' title='{$sMsg_lgn_tip}'><label for='lgn'>{$sMsg_lgn}</label></div>
+                <div class='opt'><input type='password' name='psw' value='{$sPsw}' pattern='[A-Za-z\d]{6,10}' title='{$sMsg_psw_tip}'><label for='psw'>{$sMsg_psw}</label></div>
                 <div class='sub'><input type='submit' name='aut' value='{$sMsg_sub}'></div>
             </form>
             <div class='mes_inf'>".implode("<br>",$aInf)."</div>";
         return $sHtm;
     }
-    public static function check_users(){
+    public static function show_settings(array $aInf=null){
+        self::set_lng();
+        $sMsg_hdr=self::t("Settings");
+        $sMsg_lng=self::t("Language");
+        $sLng_sel=self::show_sel("lng",self::get_lng());
+        $sMsg_sub=self::t("Apply");
+        $sHtm="
+            <form name='frm_set' action='' method='post'>
+                <div class='hdr'>{$sMsg_hdr}</div>
+                <div class='opt'>{$sLng_sel}<label for='lgn'>{$sMsg_lng}</label></div>
+                <div class='sub'><input type='submit' name='set' value='{$sMsg_sub}'></div>
+            </form>";
+        return $sHtm;
+    }
+    public static function chk_usrs(){
         $oUsr=new UserCls();
         $aDta=$oUsr->get_data();
         return $sLgn;
@@ -45,25 +59,25 @@ class UserCls
         $bLgo=(!$_SESSION["lgn"])?:false;
         return $bLgo;
     }
-    public static function is_user_data($sLgn){
+    public static function is_usr_dta($sLgn){
         try{
             if(!class_exists($sCls4UserIfc=self::$sCls4UserIfc))throw new ExcCls("No class for user interface",ExcCls::DEBUG);
             if(!$sLgn)throw new ExcCls("No login",ExcCls::DEBUG);
-            $bDta=$sCls4UserIfc::is_user_data($sLgn);
+            $bDta=$sCls4UserIfc::is_usr_dta($sLgn);
         }catch(ExcCls $eExc){
             $eExc->man();
             throw $eExc;
         }finally{
             return $bDta;}
     }
-    public function get_user_data($sLgn,$sPsw=null){
+    public function get_usr_dta($sLgn,$sPsw=null){
         try{
             if($aDta=$this->aDta)$aDtr=$aDta;
             else{
                 if(!class_exists($sCls4UserIfc=self::$sCls4UserIfc))throw new ExcCls("No class for user interface",ExcCls::DEBUG);
-                if(!$this->is_user_data($sLgn))throw new ExcCls("No match login",ExcCls::DEBUG);
+                if(!$this->is_usr_dta($sLgn))throw new ExcCls("No match login",ExcCls::DEBUG);
                 if((!$sPsw)and(!$sSid=session_id()))throw new ExcCls("No password or session",ExcCls::DEBUG);
-                if(!$aDta=$sCls4UserIfc::get_user_data($sLgn))throw new ExcCls("No read login data",ExcCls::DEBUG);
+                if(!$aDta=$sCls4UserIfc::get_usr_dta($sLgn))throw new ExcCls("No read login data",ExcCls::DEBUG);
                 if($sPsw&&!password_verify($sPsw,$aDta["psw"]))throw new ExcCls("No match password",ExcCls::DEBUG);
                 if((!$sPsw)and($aDta["ses"]!=$sSid))throw new ExcCls("No match session",ExcCls::DEBUG);
                 $this->aDta=$aDtr=$aDta;}
@@ -73,7 +87,7 @@ class UserCls
         }finally{
             return $aDtr;}
     }
-    public function set_user_data($sLgn,$sPsw=null,array $aDta=null){
+    public function set_usr_dta($sLgn,$sPsw=null,array $aDta=null){
         try{
             if(!class_exists($sCls4UserIfc=self::$sCls4UserIfc))throw new ExcCls("No class for user interface",ExcCls::DEBUG);
             if(!$sLgn)throw new ExcCls("No login",ExcCls::DEBUG);
@@ -88,7 +102,7 @@ class UserCls
             $aDta["lgn"]=$sLgn;
             $aDta["ses"]=$sSid;
             $aDta["dt_upd"]=date("Y-m-d H:i:s");
-            if(!$bWrt=$sCls4UserIfc::set_user_data($sLgn,$aDta))throw new ExcCls("No write login data",ExcCls::DEBUG);
+            if(!$bWrt=$sCls4UserIfc::set_usr_dta($sLgn,$aDta))throw new ExcCls("No write login data",ExcCls::DEBUG);
             $this->aDta=$aDtr=$aDta;
         }catch(ExcCls $eExc){
             $eExc->man();
@@ -96,11 +110,11 @@ class UserCls
         }finally{
             return $aDtr;}
     }
-    public static function del_user_data($sLgn){
+    public static function del_usr_dta($sLgn){
         try{
             if(!class_exists($sCls4UserIfc=self::$sCls4UserIfc))throw new ExcCls("No class for user interface",ExcCls::DEBUG);
-            if(!$sCls4UserIfc::is_user_data($sLgn))throw new ExcCls("No match login",ExcCls::DEBUG);
-            if(!$bDel=$sCls4UserIfc::del_user_data($sLgn))throw new ExcCls("No delete login data",ExcCls::DEBUG);
+            if(!$sCls4UserIfc::is_usr_dta($sLgn))throw new ExcCls("No match login",ExcCls::DEBUG);
+            if(!$bDel=$sCls4UserIfc::del_usr_dta($sLgn))throw new ExcCls("No delete login data",ExcCls::DEBUG);
         }catch(ExcCls $eExc){
             $eExc->man();
             throw $eExc;
@@ -111,7 +125,16 @@ class UserCls
         return $this->aPos;
     }
     public function set_pos(array $aPos){
-        $this->aPos=$aPos;
-        $this->aHis[]=$aPos;
+        try{
+            if(!$aPos=MapCls::chk_pos($aPos))throw new ExcCls("No position",ExcCls::DEBUG);
+            $this->aPos=$aPos;
+            $this->aHis[]=$aPos;
+            $bR=true;
+        }catch(ExcCls $eExc){
+            $eExc->man();
+            throw $eExc;
+        }finally{
+            return $bR;}
+        
     }
 }
