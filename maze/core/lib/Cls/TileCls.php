@@ -8,10 +8,18 @@ class TileCls
     private $bEnt=false;
     private $bExt=false;
     private $bUsr=false;
-    function __construct($bWll=false,$bVis=false,$aPos=null){
-        $this->bWll=($bWll)?:false;
-        $this->bVis=($bVis)?:false;
-        $this->aPos=$aPos;
+    function __construct($bWll=false,$bVis=false,array $aPos=null){
+        try{
+            if(!$aPos)throw new ExcCls("No position",ExcCls::DEBUG);
+            $this->bWll=($bWll)?:false;
+            $this->bVis=($bVis)?:false;
+            $this->aPos=$aPos;
+            $bR=true;
+        }catch(ExcCls $eExc){
+            $eExc->man();
+            throw $eExc;
+        }finally{
+            return $bR;}
     }
     public function get_pos(){
         return $this->aPos;

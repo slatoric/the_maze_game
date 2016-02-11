@@ -8,16 +8,24 @@ class MapCls
     private $aSz;
     const UP=0,UPRT=1,RT=2,DNRT=3,DN=4,DNLT=5,LT=6,UPLT=7;
     function __construct(array $aMap){
-        foreach($aMap as $iK=>$aLn){
-            foreach($aLn as $iJ=>$iV){
-                $aMapIn[]=new TileCls(($iV==1)?:false,false,["iX"=>$iJ,"iY"=>$iK]);
-                $iX=($iJ>$iX)?$iJ:$iX;
+        try{
+            if(!$aMap)throw new ExcCls("No map",ExcCls::DEBUG);
+            foreach($aMap as $iK=>$aLn){
+                foreach($aLn as $iJ=>$iV){
+                    $aLnn[]=new TileCls(($iV==1)?:false,false,["iX"=>$iJ,"iY"=>$iK]);
+                    $iX=($iJ>$iX)?$iJ:$iX;//max horiz
+                }
+                $aMpn[]=$aLnn;unset($aLnn);
+                $iY=($iK>$iY)?$iK:$iY;//max vert
             }
-            $aNew[]=$aMapIn;unset($aMapIn);
-            $iY=($iK>$iY)?$iK:$iY;
-        }
-        $this->aMap=$aNew;
-        $this->aSz=["iX"=>$iX,"iY"=>$iY];
+            $this->aMap=$aMpn;
+            $this->aSz=["iX"=>$iX,"iY"=>$iY];
+            $bR=true;
+        }catch(ExcCls $eExc){
+            $eExc->man();
+            throw $eExc;
+        }finally{
+            return $bR;}
     }
     public function show_map(){
         return MapPicCls4MapIfc::show_map($this->aMap);
@@ -77,7 +85,7 @@ class MapCls
         }finally{
             return $this->aExt;}
     }
-    public function get_dir(array $aPos){
+    public function get_dir(array $aPos){//finds possible ways on tile
         try{
             $oT=$this->get_tile($aPos);
             if(is_object($oT)&&!$oT->is_wll()){
@@ -92,44 +100,46 @@ class MapCls
             return $aDrs;}
     }
     public function get_pos_nxt($iDir,array $aPos=null,$bFrn=false){//recursive
-        $aDrs=$this->get_dir($aPos);
-        $bGo=(($bFrn)or((!$bFrn)and(count($aDrs)<3)));
-        if((isset($iDir))and($aDrs)and($bGo)and(in_array($iDir,$aDrs))){
-            switch($iDir){
-                case 0:
-                    $aPsn=["iY"=>$aPos["iY"]-1,"iX"=>$aPos["iX"]];
-                    break;
-                case 2:
-                    $aPsn=["iY"=>$aPos["iY"],"iX"=>$aPos["iX"]+1];
-                    break;
-                case 4:
-                    $aPsn=["iY"=>$aPos["iY"]+1,"iX"=>$aPos["iX"]];
-                    break;
-                case 6:
-                    $aPsn=["iY"=>$aPos["iY"],"iX"=>$aPos["iX"]-1];
-                    break;
-            }
-            if($aPsn)$aPsr=$this->get_pos_nxt($iDir,$aPsn);
-            if(!$aPsr)$aPsr=$aPsn;
-        }
-        else $aPsr=$aPos;
-        return $aPsr;
-    }
-    public function set_usr(&$oUsr,$iDir=null){//only map to user interaction
         try{
-            if(!$oUsr)throw new ExcCls("No user object",ExcCls::DEBUG);
+            $aDrs=$this->get_dir($aPos);
+            $bGo=(($bFrn)or((!$bFrn)and(count($aDrs)<3)));
+            if((isset($iDir))and($aDrs)and($bGo)and(in_array($iDir,$aDrs))){
+                switch($iDir){
+                    case 0:
+                        $aPsn=["iY"=>$aPos["iY"]-1,"iX"=>$aPos["iX"]];
+                        break;
+                    case 2:
+                        $aPsn=["iY"=>$aPos["iY"],"iX"=>$aPos["iX"]+1];
+                        break;
+                    case 4:
+                        $aPsn=["iY"=>$aPos["iY"]+1,"iX"=>$aPos["iX"]];
+                        break;
+                    case 6:
+                        $aPsn=["iY"=>$aPos["iY"],"iX"=>$aPos["iX"]-1];
+                        break;
+                }
+                if($aPsn)$aPsr=$this->get_pos_nxt($iDir,$aPsn);
+                if(!$aPsr)$aPsr=$aPsn;
+            }else
+                $aPsr=$aPos;
+        }catch(ExcCls $eExc){
+            $eExc->man();
+            throw $eExc;
+        }finally{
+            return $aPsr;}
+    }
+    public function set_usr($iDir=null,&$oUsr=null){//may be only map <--> user interaction privider
+        try{
             if(!$aMap=$this->aMap)throw new ExcCls("No map",ExcCls::DEBUG);
+            if($oUsr&&!is_object($oUsr))throw new ExcCls("No match user",ExcCls::DEBUG);
             if(isset($iDir)){
                 if(!$aPsw=self::chk_pos($oUsr->get_pos()))throw new ExcCls("No user position",ExcCls::DEBUG);
                 extract($aPsw);
                 if(!$aMap[$iY][$iX]->set_usr(false))throw new ExcCls("No unset user tile",ExcCls::DEBUG);
-                
                 $aPsn=$this->get_pos_nxt($iDir,$aPsw,true);
-                echo "<pre>aPsn";var_dump($aPsn);echo "</pre>";
-                exit;
-                $oUsr->set_pos($aPsn);
-                $this->aMap[$aPsn["iY"]][$aPsn["iX"]]->toggle_user(true);
-                $this->recover_track($aPsw,$aPsn);
+                if(!$aMap[$aPsn["iY"]][$aPsn["iX"]]->set_usr(true))throw new ExcCls("No set user tile",ExcCls::DEBUG);
+                if(!$oUsr->set_pos($aPsn))throw new ExcCls("No set user position",ExcCls::DEBUG);
+                if(!$this->recover_track($aPsw,$aPsn))throw new ExcCls("No recover track",ExcCls::DEBUG);
             }else{
                 if(!$aEnt=$this->aEnt)throw new ExcCls("No entries",ExcCls::DEBUG);
                 if(!is_object($oT=reset($aEnt)))throw new ExcCls("No entry tile",ExcCls::DEBUG);
@@ -175,26 +185,37 @@ class MapCls
         }finally{
             return $bR;}
     }
-    public function recover_track($aPsw,$aPsn=null){
-        $iYw=$aPsw["iY"];
-        $iXw=$aPsw["iX"];
-        if($aPsn)extract($aPsn);
-        $bHor=($iYw==$iY)?:false;
-        $bVer=($iXw==$iX)?:false;
-        if(isset($iYw)){
-            if((!$bHor&&!$bVer)or($bHor&&$bVer))$this->recover_area($aPsw);
-            elseif($bHor&&!$bVer){
-                $iDmx=($iXw>$iX)?$iXw:$iX;
-                $iDmn=($iXw<$iX)?$iXw:$iX;}
-            elseif(!$bHor&&$bVer){
-                $iDmx=($iYw>$iY)?$iYw:$iY;
-                $iDmn=($iYw<$iY)?$iYw:$iY;}
-            if(isset($iDmx))
-                for($iD=$iDmn;$iD<=$iDmx;$iD++){
-                    $sX=($bHor)?"iD":"iXw";
-                    $sY=($bHor)?"iYw":"iD";
-                    $this->recover_area(["iY"=>$$sY,"iX"=>$$sX]);}
-        }
+    public function recover_track(array $aPsw,array $aPsn=null){
+        try{
+            $iYw=$aPsw["iY"];
+            $iXw=$aPsw["iX"];
+            if($aPsn)
+                extract($aPsn);
+            $bHor=($iYw==$iY)?:false;
+            $bVer=($iXw==$iX)?:false;
+            if(isset($iYw)){
+                if((!$bHor&&!$bVer)or($bHor&&$bVer))//if no vert and horiz shift or both vert and horiz shift
+                    $bR=$this->recover_area($aPsw);
+                elseif($bHor&&!$bVer){//if horiz shift
+                    $iDmx=($iXw>$iX)?$iXw:$iX;
+                    $iDmn=($iXw<$iX)?$iXw:$iX;}
+                elseif(!$bHor&&$bVer){//if vert shift
+                    $iDmx=($iYw>$iY)?$iYw:$iY;
+                    $iDmn=($iYw<$iY)?$iYw:$iY;}
+                if(isset($iDmx))
+                    for($iD=$iDmn;$iD<=$iDmx;$iD++){
+                        $sX=($bHor)?"iD":"iXw";
+                        $sY=($bHor)?"iYw":"iD";
+                        if(!$this->recover_area(["iY"=>$$sY,"iX"=>$$sX]))
+                            $bR=false;
+                    }
+            }
+            $bR=($bR===false)?false:true;
+        }catch(ExcCls $eExc){
+            $eExc->man();
+            throw $eExc;
+        }finally{
+            return $bR;}
     }
     public function get_tile(array $aPos,$iDir=null){
         try{

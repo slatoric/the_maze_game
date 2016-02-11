@@ -43,17 +43,17 @@ class MazeCls
                 $aErr[]=self::t('No login');
                 $bFmd=false;//enter mode
             }else{
-                if(!UserCls::is_user_data($sLgn)and($sAut==self::t("Enter"))){
+                if(!UserCls::is_usr_dta($sLgn)and($sAut==self::t("Enter"))){
                     $aErr[]=self::t('No match login');
                     $bFmd=true;//register mode
-                }elseif((!$sPsw=$_REQUEST["psw"])or((UserCls::is_user_data($sLgn))and(!$aDta=$oUsr->get_usr_dta($sLgn,$sPsw)))){//empty or wrong pass
+                }elseif((!$sPsw=$_REQUEST["psw"])or((UserCls::is_usr_dta($sLgn))and(!$aDta=$oUsr->get_usr_dta($sLgn,$sPsw)))){//empty or wrong pass
                     $aErr[]=self::t('No match password');
-                    $bFmd=(($sAut!=self::t("Enter"))&&(!UserCls::is_user_data($sLgn)))?:false;//check mode
+                    $bFmd=(($sAut!=self::t("Enter"))&&(!UserCls::is_usr_dta($sLgn)))?:false;//check mode
                 }
             }
         }
         if(!$aErr){
-            if($sAut==self::t("Register"))$aDta=$oUsr->set_user_data($sLgn,$sPsw=$_REQUEST["psw"],["dt_reg"=>date("Y-m-d H:i:s"),"psw"=>password_hash($sPsw,PASSWORD_DEFAULT)]);
+            if($sAut==self::t("Register"))$aDta=$oUsr->set_usr_dta($sLgn,$sPsw=$_REQUEST["psw"],["dt_reg"=>date("Y-m-d H:i:s"),"psw"=>password_hash($sPsw,PASSWORD_DEFAULT)]);
             else $aDta=$oUsr->get_usr_dta($sLgn,$sPsw);
         }
         $sHtm=self::say_hi($aDta["lgn"]);
@@ -62,7 +62,7 @@ class MazeCls
         if(isset($bFmd))
             $sHtm.=UserCls::show_frm_aut($bFmd,$aInf);
         if(($aDta)and(!$this->oUsr)){
-            if($aDta["ses"]!=$sSid=session_id())$aDta=$oUsr->set_user_data($sLgn,"",$aDta);
+            if($aDta["ses"]!=$sSid=session_id())$aDta=$oUsr->set_usr_dta($sLgn,"",$aDta);
             $this->oUsr=$oUsr;}
         return $sHtm;
     }
@@ -116,6 +116,7 @@ class MazeCls
         return $sHtm;
     }
     public function new_map(){
+        echo "<pre>this->oUsr";var_dump($this->oUsr);echo "</pre>";
         $aMap=[
 [1,0,1,1,1,1,1,1,1],
 [1,0,0,0,0,0,0,0,1],
@@ -135,15 +136,30 @@ class MazeCls
         //echo "<pre>aEnt";var_dump($aEnt);echo "</pre>";
         $aExt=$oMap->get_ext();
         //echo "<pre>aExt";var_dump($aExt);echo "</pre>";
-        $bUsr=$oMap->set_usr($this->oUsr);
+        $bUsr=$oMap->set_usr(null,$this->oUsr);
         //echo "<pre>bUsr";var_dump($bUsr);echo "</pre>";
         $sHtm="<br>".$oMap->show_map();
         //echo "<pre>oMap";var_dump($oMap);echo "</pre>";
-        
-        $bUsr=$oMap->set_usr($this->oUsr,MapCls::UP);
+        //$oUsr=$this->oUsr;
+        $bUsr=$oMap->set_usr(MapCls::UP,$oUsr);
+        $bUsr=$oMap->set_usr(MapCls::LT,$oUsr);
+        $bUsr=$oMap->set_usr(MapCls::RT,$oUsr);
+        $bUsr=$oMap->set_usr(MapCls::RT,$oUsr);
+        $bUsr=$oMap->set_usr(MapCls::UP,$oUsr);
+        $bUsr=$oMap->set_usr(MapCls::LT,$oUsr);
+        $bUsr=$oMap->set_usr(MapCls::UP,$oUsr);
+        $bUsr=$oMap->set_usr(MapCls::LT,$oUsr);
+        $bUsr=$oMap->set_usr(MapCls::DN,$oUsr);
+        $bUsr=$oMap->set_usr(MapCls::UP,$oUsr);
+        $bUsr=$oMap->set_usr(MapCls::RT,$oUsr);
+        $bUsr=$oMap->set_usr(MapCls::RT,$oUsr);
+        $bUsr=$oMap->set_usr(MapCls::UP,$oUsr);
+        $bUsr=$oMap->set_usr(MapCls::LT,$oUsr);
+        $bUsr=$oMap->set_usr(MapCls::UP,$oUsr);
         echo "<pre>bUsr";var_dump($bUsr);echo "</pre>";
         $sHtm="<br>".$oMap->show_map();
-        exit;
+        echo "<pre>this->oUsr";var_dump($this->oUsr);echo "</pre>";
+        //exit;
         $oJoy=new JoysCls([0,2,4,6]);
         //echo "<pre>oJoy";var_dump($oJoy);echo "</pre>";
         $sHtm.=$oJoy->show_joy();
