@@ -28,9 +28,9 @@ class JoysCls
         $sHtm="
             <form action='' method='post'>
                 <table>
-                    <tr><td></td><td><input type='submit' name='UP' value='/\'{$sUpd}></td><td></td></tr>
-                    <tr><td><input type='submit' name='LT' value='<'{$sLtd}></td><td></td><td><input type='submit' name='RT' value='>'{$sRtd}></td></tr>
-                    <tr><td></td><td><input type='submit' name='DN' value='\/'{$sDnd}></td><td></td></tr>
+                    <tr><td></td><td><input type='submit' name='dir' value='/\'{$sUpd}></td><td></td></tr>
+                    <tr><td><input type='submit' name='dir' value='<'{$sLtd}></td><td></td><td><input type='submit' name='dir' value='>'{$sRtd}></td></tr>
+                    <tr><td></td><td><input type='submit' name='dir' value='\/'{$sDnd}></td><td></td></tr>
                 </table>
             </form>";
         return $sHtm;

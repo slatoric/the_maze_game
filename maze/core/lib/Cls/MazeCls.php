@@ -24,8 +24,8 @@ class MazeCls
                 $aInfm[]=self::t("Please, select action");
             }
         }
-        echo $this->init_user($aInf);
-        if($bUsr=$this->is_user()){
+        echo $this->init_usr($aInf);
+        if($bUsr=$this->is_usr()){
             if($bGmn)echo $this->new_map();
             else echo ($sHtm)?:self::show_menu_main($aInfm);
             
@@ -34,7 +34,7 @@ class MazeCls
         else
             echo $sSel=self::show_lng_sel();//language selector
     }
-    public function init_user(array $aInf=null){
+    public function init_usr(array $aInf=null){
         $oUsr=new UserCls();
         UserCls::set_lng(self::$sLng);
         $sLgn=UserCls::log_in();
@@ -66,7 +66,7 @@ class MazeCls
             $this->oUsr=$oUsr;}
         return $sHtm;
     }
-    public function is_user(){
+    public function is_usr(){
         return ($this->oUsr)?true:false;
     }
     public static function say_hi($sLgn=null){
@@ -136,35 +136,35 @@ class MazeCls
         //echo "<pre>aEnt";var_dump($aEnt);echo "</pre>";
         $aExt=$oMap->get_ext();
         //echo "<pre>aExt";var_dump($aExt);echo "</pre>";
-        $bUsr=$oMap->set_usr(null,$this->oUsr);
+        $bUsr=$oMap->set_usr();
         //echo "<pre>bUsr";var_dump($bUsr);echo "</pre>";
         $sHtm="<br>".$oMap->show_map();
         //echo "<pre>oMap";var_dump($oMap);echo "</pre>";
-        //$oUsr=$this->oUsr;
-        $bUsr=$oMap->set_usr(MapCls::UP,$oUsr);
-        $bUsr=$oMap->set_usr(MapCls::LT,$oUsr);
-        $bUsr=$oMap->set_usr(MapCls::RT,$oUsr);
-        $bUsr=$oMap->set_usr(MapCls::RT,$oUsr);
-        $bUsr=$oMap->set_usr(MapCls::UP,$oUsr);
-        $bUsr=$oMap->set_usr(MapCls::LT,$oUsr);
-        $bUsr=$oMap->set_usr(MapCls::UP,$oUsr);
-        $bUsr=$oMap->set_usr(MapCls::LT,$oUsr);
-        $bUsr=$oMap->set_usr(MapCls::DN,$oUsr);
-        $bUsr=$oMap->set_usr(MapCls::UP,$oUsr);
-        $bUsr=$oMap->set_usr(MapCls::RT,$oUsr);
-        $bUsr=$oMap->set_usr(MapCls::RT,$oUsr);
-        $bUsr=$oMap->set_usr(MapCls::UP,$oUsr);
-        $bUsr=$oMap->set_usr(MapCls::LT,$oUsr);
-        $bUsr=$oMap->set_usr(MapCls::UP,$oUsr);
+        /*$bUsr=$oMap->set_usr(MapCls::UP);
+        $bUsr=$oMap->set_usr(MapCls::LT);
+        $bUsr=$oMap->set_usr(MapCls::RT);
+        $bUsr=$oMap->set_usr(MapCls::RT);
+        $bUsr=$oMap->set_usr(MapCls::UP);
+        $bUsr=$oMap->set_usr(MapCls::LT);
+        $bUsr=$oMap->set_usr(MapCls::UP);
+        $bUsr=$oMap->set_usr(MapCls::LT);
+        $bUsr=$oMap->set_usr(MapCls::DN);
+        $bUsr=$oMap->set_usr(MapCls::UP);
+        $bUsr=$oMap->set_usr(MapCls::RT);
+        $bUsr=$oMap->set_usr(MapCls::RT);
+        $bUsr=$oMap->set_usr(MapCls::UP);
+        $bUsr=$oMap->set_usr(MapCls::LT);
+        $bUsr=$oMap->set_usr(MapCls::UP);*/
         echo "<pre>bUsr";var_dump($bUsr);echo "</pre>";
         $sHtm="<br>".$oMap->show_map();
         echo "<pre>this->oUsr";var_dump($this->oUsr);echo "</pre>";
+        $sHtm.=$oMap->show_joy();
         //exit;
-        $oJoy=new JoysCls([0,2,4,6]);
+        //$oJoy=new JoysCls([0,2,4,6]);
         //echo "<pre>oJoy";var_dump($oJoy);echo "</pre>";
-        $sHtm.=$oJoy->show_joy();
+        //$sHtm.=$oJoy->show_joy();
         //echo $sHtm;
-        echo $oJoy->get_dir();
+        //echo $oJoy->get_dir();
         return $sHtm;
     }
 }

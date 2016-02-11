@@ -6,6 +6,8 @@ class MapCls
     private $aEnt;
     private $aExt;
     private $aSz;
+    private $aHis;//history of user position
+    private $oJoy;
     const UP=0,UPRT=1,RT=2,DNRT=3,DN=4,DNLT=5,LT=6,UPLT=7;
     function __construct(array $aMap){
         try{
@@ -20,6 +22,7 @@ class MapCls
             }
             $this->aMap=$aMpn;
             $this->aSz=["iX"=>$iX,"iY"=>$iY];
+            $this->oJoy=new JoysCls();
             $bR=true;
         }catch(ExcCls $eExc){
             $eExc->man();
@@ -29,6 +32,9 @@ class MapCls
     }
     public function show_map(){
         return MapPicCls4MapIfc::show_map($this->aMap);
+    }
+    public function show_joy(){
+        return $this->oJoy->show_joy();
     }
     public static function chk_pos($aPos){
         try{
@@ -128,17 +134,19 @@ class MapCls
         }finally{
             return $aPsr;}
     }
-    public function set_usr($iDir=null,&$oUsr=null){//may be only map <--> user interaction privider
+    public function set_usr($iDir=null){
         try{
             if(!$aMap=$this->aMap)throw new ExcCls("No map",ExcCls::DEBUG);
-            if($oUsr&&!is_object($oUsr))throw new ExcCls("No match user",ExcCls::DEBUG);
+            if(!$oJoy=$this->oJoy)throw new ExcCls("No joystick",ExcCls::DEBUG);
             if(isset($iDir)){
-                if(!$aPsw=self::chk_pos($oUsr->get_pos()))throw new ExcCls("No user position",ExcCls::DEBUG);
+                if(!$aPsw=self::chk_pos(end($this->aHis)))throw new ExcCls("No user position",ExcCls::DEBUG);
                 extract($aPsw);
                 if(!$aMap[$iY][$iX]->set_usr(false))throw new ExcCls("No unset user tile",ExcCls::DEBUG);
                 $aPsn=$this->get_pos_nxt($iDir,$aPsw,true);
                 if(!$aMap[$aPsn["iY"]][$aPsn["iX"]]->set_usr(true))throw new ExcCls("No set user tile",ExcCls::DEBUG);
-                if(!$oUsr->set_pos($aPsn))throw new ExcCls("No set user position",ExcCls::DEBUG);
+                $this->aHis[]=$aPsn;
+                echo "<pre>aPsn";var_dump($aPsn);echo "</pre>";
+                $aDrs=$this->get_dir($aPsn);
                 if(!$this->recover_track($aPsw,$aPsn))throw new ExcCls("No recover track",ExcCls::DEBUG);
             }else{
                 if(!$aEnt=$this->aEnt)throw new ExcCls("No entries",ExcCls::DEBUG);
@@ -146,9 +154,12 @@ class MapCls
                 if(!$aPos=self::chk_pos($oT->get_pos()))throw new ExcCls("No entry postion",ExcCls::DEBUG);
                 extract($aPos);
                 if(!$aMap[$iY][$iX]->set_usr(true))throw new ExcCls("No set user tile",ExcCls::DEBUG);
-                if(!$oUsr->set_pos($aPos))throw new ExcCls("No set user position",ExcCls::DEBUG);
+                $this->aHis[]=$aPos;
+                echo "<pre>aPos";var_dump($aPos);echo "</pre>";
+                $aDrs=$this->get_dir($aPos);
                 if(!$this->recover_area($aPos))throw new ExcCls("No recover area",ExcCls::DEBUG);
             }
+            $oJoy->set_dir($aDrs);
             $bR=true;
         }catch(ExcCls $eExc){
             $eExc->man();

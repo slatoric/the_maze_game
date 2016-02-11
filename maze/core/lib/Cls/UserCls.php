@@ -4,8 +4,6 @@ class UserCls
 {
     use \core\lib\trt\LngTrt;
     private static $sCls4UserIfc=__NAMESPACE__."\\".UserFileCls4UserIfc;
-    private $aPos;
-    private $aHis;//history
     private $aDta;
     function __construct(){
         
@@ -70,12 +68,23 @@ class UserCls
         }finally{
             return $bDta;}
     }
-    public function get_usr_dta($sLgn,$sPsw=null){
+    public static function del_usr_dta($sLgn){
+        try{
+            if(!class_exists($sCls4UserIfc=self::$sCls4UserIfc))throw new ExcCls("No class for user interface",ExcCls::DEBUG);
+            if(!$sCls4UserIfc::is_usr_dta($sLgn))throw new ExcCls("No match login",ExcCls::DEBUG);
+            if(!$bDel=$sCls4UserIfc::del_usr_dta($sLgn))throw new ExcCls("No delete login data",ExcCls::DEBUG);
+        }catch(ExcCls $eExc){
+            $eExc->man();
+            throw $eExc;
+        }finally{
+            return $bDel;}
+    }
+    public function get_usr_dta($sLgn,$sPsw=null){//read from user object or file
         try{
             if($aDta=$this->aDta)$aDtr=$aDta;
             else{
                 if(!class_exists($sCls4UserIfc=self::$sCls4UserIfc))throw new ExcCls("No class for user interface",ExcCls::DEBUG);
-                if(!$this->is_usr_dta($sLgn))throw new ExcCls("No match login",ExcCls::DEBUG);
+                if(!self::is_usr_dta($sLgn))throw new ExcCls("No match login",ExcCls::DEBUG);
                 if((!$sPsw)and(!$sSid=session_id()))throw new ExcCls("No password or session",ExcCls::DEBUG);
                 if(!$aDta=$sCls4UserIfc::get_usr_dta($sLgn))throw new ExcCls("No read login data",ExcCls::DEBUG);
                 if($sPsw&&!password_verify($sPsw,$aDta["psw"]))throw new ExcCls("No match password",ExcCls::DEBUG);
@@ -109,32 +118,5 @@ class UserCls
             throw $eExc;
         }finally{
             return $aDtr;}
-    }
-    public static function del_usr_dta($sLgn){
-        try{
-            if(!class_exists($sCls4UserIfc=self::$sCls4UserIfc))throw new ExcCls("No class for user interface",ExcCls::DEBUG);
-            if(!$sCls4UserIfc::is_usr_dta($sLgn))throw new ExcCls("No match login",ExcCls::DEBUG);
-            if(!$bDel=$sCls4UserIfc::del_usr_dta($sLgn))throw new ExcCls("No delete login data",ExcCls::DEBUG);
-        }catch(ExcCls $eExc){
-            $eExc->man();
-            throw $eExc;
-        }finally{
-            return $bDel;}
-    }
-    public function get_pos(){
-        return $this->aPos;
-    }
-    public function set_pos(array $aPos){
-        try{
-            if(!$aPos=MapCls::chk_pos($aPos))throw new ExcCls("No position",ExcCls::DEBUG);
-            $this->aPos=$aPos;
-            $this->aHis[]=$aPos;
-            $bR=true;
-        }catch(ExcCls $eExc){
-            $eExc->man();
-            throw $eExc;
-        }finally{
-            return $bR;}
-        
     }
 }
