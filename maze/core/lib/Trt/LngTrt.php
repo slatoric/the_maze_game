@@ -43,16 +43,6 @@ trait LngTrt
         }finally{
             return $sSel;}
     }
-    public static function get_lng(){
-        try{
-            if(!class_exists($sCls4LngIfc=self::$sCls4LngIfc))throw new ExcCls("No class for language interface",ExcCls::DEBUG);
-            $sLng=self::$sLng;
-        }catch(ExcCls $eExc){
-            $eExc->man();
-            throw $eExc;
-        }finally{
-            return $sSel;}
-    }
     public static function set_lng($sLng=null){
         try{
             if(!class_exists($sCls4LngIfc=self::$sCls4LngIfc))throw new ExcCls("No class for language interface",ExcCls::DEBUG);

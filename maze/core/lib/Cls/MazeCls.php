@@ -3,7 +3,6 @@ namespace core\lib\cls;
 class MazeCls
 {
     use \core\lib\trt\LngTrt;//to send multilingual messages to user
-    private $oMap;
     private $oUsr;
     function __construct(){
         
@@ -20,17 +19,21 @@ class MazeCls
                 $bGmn=false;
             }elseif($_REQUEST["act"]=="set"){
                 $sHtm=UserCls::show_settings();
-            }else{
+            }elseif($_REQUEST["act"]=="mmn"){
+                
+            }else
                 $aInfm[]=self::t("Please, select action");
-            }
         }
+        if($sDir=$_REQUEST["dir"])
+            $bGmn=false;
         echo $this->init_usr($aInf);
         if($bUsr=$this->is_usr()){
-            if($bGmn)echo $this->new_map();
-            else echo ($sHtm)?:self::show_menu_main($aInfm);
-            
-            }
-        else
+            if(isset($bGmn)){
+                echo $this->oUsr->play($bGmn,$sDir);
+                echo self::show_menu_game();
+            }else
+                echo ($sHtm)?:self::show_menu_main($aInfm,$this->oUsr->is_map());
+        }else
             echo $sSel=self::show_lng_sel();//language selector
     }
     public function new_map(){
@@ -94,20 +97,21 @@ class MazeCls
             }
         return $sHtm;
     }
-    public static function show_menu_main(array $aInf=null){
+    public static function show_menu_main(array $aInf=null,$bGnm=true){
         $sMsg_hdr=self::t("Main menu");
         $sMsg_gmn=self::t("Play new game");
         $sMsg_gmr=self::t("Resume saved game");
         $sMsg_set=self::t("Customize");
         $sMsg_ext=self::t("Exit");
         $sMsg_sub=self::t("Apply");
+        $sDis=($bGnm===false)?" disabled='disabled'":"";
         $aTps=[$sMsg_lgn_tip,$sMsg_psw_tip];
         $sInf=($aInf)?"<div class='mes_inf'>".implode("<br>",$aInf)."</div>":"";
         $sHtm="
             <form name='frm_mnu_mn' action='' method='post'>
                 <div class='hdr'>{$sMsg_hdr}</div>
                 <div class='opt'><input type='radio' name='act' id='gmn' value='gmn'><label for='gmn'>{$sMsg_gmn}</label></div>
-                <div class='opt'><input type='radio' name='act' id='gmr' value='gmr'><label for='gmr'>{$sMsg_gmr}</label></div>
+                <div class='opt'><input type='radio' name='act' id='gmr' value='gmr'{$sDis}><label for='gmr'>{$sMsg_gmr}</label></div>
                 <div class='opt'><input type='radio' name='act' id='set' value='set'><label for='set'>{$sMsg_set}</label></div>
                 <div class='opt'><input type='radio' name='act' id='ext' value='ext'><label for='ext'>{$sMsg_ext}</label></div>
                 <div class='sub'><input type='submit' name='do' value='{$sMsg_sub}'></div>

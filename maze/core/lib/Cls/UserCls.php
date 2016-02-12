@@ -32,7 +32,7 @@ class UserCls
         self::set_lng();
         $sMsg_hdr=self::t("Settings");
         $sMsg_lng=self::t("Language");
-        $sLng_sel=self::show_sel("lng",self::get_lng());
+        $sLng_sel=self::show_sel("lng",self::$sLng);
         $sMsg_sub=self::t("Apply");
         $sHtm="
             <form name='frm_set' action='' method='post'>
@@ -118,5 +118,53 @@ class UserCls
             throw $eExc;
         }finally{
             return $aDtr;}
+    }
+    public function is_map(){
+        return ($this->aDta["map"])?:false;
+    }
+    public function play($bGmn=true,$sDir=null){
+        try{
+            //echo "<pre>bGmn";var_dump($bGmn);echo "</pre>";
+            //echo "<pre>sDir";var_dump($sDir);echo "</pre>";
+            //echo "<pre>this->aDta";var_dump($this->aDta);echo "</pre>";
+            if($bGmn){
+                $this->aDta["map"]=$oMap=MapCls::get_map(1);
+                //$this->aDta=$this->set_usr_dta($this->aDta["lgn"],null,$this->aDta);
+            }elseif($this->aDta["map"])
+                $oMap=$this->aDta["map"];
+            //echo "<pre>oMap";var_dump($oMap);echo "</pre>";
+            //exit;
+            //$bUsr=$oMap->is_win();
+            //echo "<pre>bUsr";var_dump($bUsr);echo "</pre>";
+            if(!is_object($oMap))throw new ExcCls("No map",ExcCls::DEBUG);
+            switch($sDir){
+                case "/\\":
+                    $iDir=MapCls::UP;
+                    break;
+                case "\/":
+                    $iDir=MapCls::DN;
+                    break;
+                case "<":
+                    $iDir=MapCls::LT;
+                    break;
+                case ">":
+                    $iDir=MapCls::RT;
+                    break;
+                default:
+                    unset($iDir);
+            }
+            if(isset($iDir))$oMap->set_usr($iDir);
+            if($oMap->is_win()){
+                $sHtm="<div class='mes_inf'>".self::t("You win!")."</div>";
+            }else{
+                $this->aDta=$this->set_usr_dta($this->aDta["lgn"],null,$this->aDta);
+                $sHtm="<br>".$oMap->show_map();
+                $sHtm.=$oMap->show_joy();
+            }
+        }catch(ExcCls $eExc){
+            $eExc->man();
+            throw $eExc;
+        }finally{
+            return $sHtm;}
     }
 }

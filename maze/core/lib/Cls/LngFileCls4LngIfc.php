@@ -3,7 +3,7 @@ namespace core\lib\cls;
 class LngFileCls4LngIfc implements \core\lib\ifc\LngIfc
 {
     const PTH="/core/lib/lng/";
-    const LNG_DEF="ru";
+    const LNG_DEF="en";//important to be english
     private static $sLng;
     public static function t($sMsg,$sLng=null){
         try{
