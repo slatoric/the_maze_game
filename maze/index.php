@@ -11,17 +11,6 @@ if(!function_exists(__NAMESPACE__."\\exc_hnd")){
     }
 }
 set_exception_handler(__NAMESPACE__."\\exc_hnd");
-$aMap=[
-[1,0,1,1,1,1,1,1,1],
-[1,0,0,0,0,0,0,0,1],
-[1,1,1,1,1,1,1,0,1],
-[1,0,0,0,0,0,0,0,1],
-[1,0,1,1,0,1,1,1,1],
-[1,0,0,1,0,0,0,0,1],
-[1,1,1,1,1,1,1,0,1],
-[1,0,0,0,0,0,0,0,1],
-[1,1,1,1,0,1,1,1,1],
-];
 if(IN_DEV){
     echo "<pre>_REQUEST";var_dump($_REQUEST);echo "</pre>";
     echo "<pre>_SESSION";var_dump($_SESSION);echo "</pre>";

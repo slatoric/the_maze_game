@@ -2,6 +2,9 @@
 namespace core\lib\cls;
 class MapCls
 {
+    const PTH="/core/lib/lvl/";
+    private $sNm;
+    private $sDsc;
     private $aMap;
     private $aEnt;
     private $aExt;
@@ -9,12 +12,26 @@ class MapCls
     private $aHis;//history of user position
     private $oJoy;
     const UP=0,UPRT=1,RT=2,DNRT=3,DN=4,DNLT=5,LT=6,UPLT=7;
-    function __construct(array $aMap){
+    function __construct(array $aLvl){
         try{
-            if(!$aMap)throw new ExcCls("No map",ExcCls::DEBUG);
+            if(!$aLvl)throw new ExcCls("No map array",ExcCls::DEBUG);
+            if(!$sNm=$aLvl["nm"])throw new ExcCls("No map name",ExcCls::DEBUG);
+            if(!$aMap=$aLvl["map"])throw new ExcCls("No map",ExcCls::DEBUG);
+            $this->sNm=$sNm;
+            $this->sNm=$aLvl["dsc"];
+            if(isset($aLvl["way"])&&is_int($aLvl["way"]))$iWay=$aLvl["way"];
+            if(isset($aLvl["wll"])&&is_int($aLvl["wll"]))$iWll=$aLvl["wll"];
+            if(isset($aLvl["ent"])&&is_int($aLvl["ent"]))$iEnt=$aLvl["ent"];
+            if(isset($aLvl["ext"])&&is_int($aLvl["ext"]))$iExt=$aLvl["ext"];
+            if(isset($aLvl["usr"])&&is_int($aLvl["usr"]))$iUsr=$aLvl["usr"];
+            if(!isset($iWll))$iWll=1;
             foreach($aMap as $iK=>$aLn){
                 foreach($aLn as $iJ=>$iV){
-                    $aLnn[]=new TileCls(($iV==1)?:false,false,["iX"=>$iJ,"iY"=>$iK]);
+                    $oT=new TileCls(($iV==$iWll)?:false,false,["iX"=>$iJ,"iY"=>$iK]);
+                    if(($iV==$iEnt)and($oT->set_ent()))$aEnt[]=$oT;
+                    if(($iV==$iExt)and($oT->set_ext()))$aExt[]=$oT;
+                    if(($iV==$iUsr)and(!$aPos))$aPos=$oT->get_pos();
+                    $aLnn[]=$oT;
                     $iX=($iJ>$iX)?$iJ:$iX;//max horiz
                 }
                 $aMpn[]=$aLnn;unset($aLnn);
@@ -23,12 +40,32 @@ class MapCls
             $this->aMap=$aMpn;
             $this->aSz=["iX"=>$iX,"iY"=>$iY];
             $this->oJoy=new JoysCls();
+            if(!$aEnt)$this->get_ent();
+            if(!$aExt)$this->get_ext();
+            if(!$this->set_usr(null,$aPos))throw new ExcCls("No set user",ExcCls::DEBUG);
             $bR=true;
         }catch(ExcCls $eExc){
             $eExc->man();
             throw $eExc;
         }finally{
             return $bR;}
+    }
+    public static function get_map($mMp){
+        try{
+            if(!$mMp)throw new ExcCls("No map identificator",ExcCls::DEBUG);
+            if(is_int($mMp))
+                $sMpn=BDR.self::PTH."level$mMp.php";
+            elseif(is_string($mMp))
+                $sMpn=BDR.self::PTH.$mMp;
+            if(!$sMpn)throw new ExcCls("No map file name",ExcCls::DEBUG);
+            if(!is_readable($sMpn))throw new ExcCls("No read map file",ExcCls::DEBUG);
+            include_once($sMpn);
+            $oMap=new self($aLvl);
+        }catch(ExcCls $eExc){
+            $eExc->man();
+            throw $eExc;
+        }finally{
+            return $oMap;}
     }
     public function show_map(){
         return MapPicCls4MapIfc::show_map($this->aMap);
@@ -66,9 +103,9 @@ class MapCls
     public function get_ent(){
         try{
             if(!$this->aMap)throw new ExcCls("No map",ExcCls::DEBUG);
-            foreach(end($this->aMap) as $iK=>$oT){//entry can be only in lower row
+            foreach(end($this->aMap) as $iK=>$oT){//entry can be only in lower row by default
                 if(!is_object($oT))throw new ExcCls("No tile",ExcCls::DEBUG);
-                if($oT->set_ent($bVis))$aEnt[]=$oT;
+                if($oT->set_ent())$aEnt[]=$oT;
             }
             $this->aEnt=$aEnt;
         }catch(ExcCls $eExc){
@@ -80,16 +117,28 @@ class MapCls
     public function get_ext(){
         try{
             if(!$this->aMap)throw new ExcCls("No map",ExcCls::DEBUG);
-            foreach(reset($this->aMap) as $iK=>$oT){//exit can be only in upper row
+            foreach(reset($this->aMap) as $iK=>$oT){//exit can be only in upper row by default
                 if(!is_object($oT))throw new ExcCls("No tile",ExcCls::DEBUG);
-                if($oT->set_ext($bVis))$aExt[]=$oT;
+                if($oT->set_ext())$aExt[]=$oT;
             }
+            if(!$aExt)throw new ExcCls("No exits",ExcCls::DEBUG);
             $this->aExt=$aExt;
         }catch(ExcCls $eExc){
             $eExc->man();
             throw $eExc;
         }finally{
             return $this->aExt;}
+    }
+    public function is_win(){
+        try{
+            if(!$aPos=self::chk_pos(end($this->aHis)))throw new ExcCls("No user position",ExcCls::DEBUG);
+            extract($aPos);
+            $bR=$this->aMap[$iY][$iX]->is_ext();
+        }catch(ExcCls $eExc){
+            $eExc->man();
+            throw $eExc;
+        }finally{
+            return $bR;}
     }
     public function get_dir(array $aPos){//finds possible ways on tile
         try{
@@ -134,7 +183,7 @@ class MapCls
         }finally{
             return $aPsr;}
     }
-    public function set_usr($iDir=null){
+    public function set_usr($iDir=null,array $aPos=null){
         try{
             if(!$aMap=$this->aMap)throw new ExcCls("No map",ExcCls::DEBUG);
             if(!$oJoy=$this->oJoy)throw new ExcCls("No joystick",ExcCls::DEBUG);
@@ -145,17 +194,17 @@ class MapCls
                 $aPsn=$this->get_pos_nxt($iDir,$aPsw,true);
                 if(!$aMap[$aPsn["iY"]][$aPsn["iX"]]->set_usr(true))throw new ExcCls("No set user tile",ExcCls::DEBUG);
                 $this->aHis[]=$aPsn;
-                echo "<pre>aPsn";var_dump($aPsn);echo "</pre>";
                 $aDrs=$this->get_dir($aPsn);
                 if(!$this->recover_track($aPsw,$aPsn))throw new ExcCls("No recover track",ExcCls::DEBUG);
             }else{
-                if(!$aEnt=$this->aEnt)throw new ExcCls("No entries",ExcCls::DEBUG);
-                if(!is_object($oT=reset($aEnt)))throw new ExcCls("No entry tile",ExcCls::DEBUG);
-                if(!$aPos=self::chk_pos($oT->get_pos()))throw new ExcCls("No entry postion",ExcCls::DEBUG);
+                if(!$aPos){
+                    if(!$aEnt=$this->aEnt)throw new ExcCls("No entries",ExcCls::DEBUG);
+                    if(!is_object($oT=reset($aEnt)))throw new ExcCls("No entry tile",ExcCls::DEBUG);
+                    if(!$aPos=$oT->get_pos())throw new ExcCls("No entry postion",ExcCls::DEBUG);}
+                if(!$aPos=self::chk_pos($aPos))throw new ExcCls("No match user postion",ExcCls::DEBUG);
                 extract($aPos);
                 if(!$aMap[$iY][$iX]->set_usr(true))throw new ExcCls("No set user tile",ExcCls::DEBUG);
                 $this->aHis[]=$aPos;
-                echo "<pre>aPos";var_dump($aPos);echo "</pre>";
                 $aDrs=$this->get_dir($aPos);
                 if(!$this->recover_area($aPos))throw new ExcCls("No recover area",ExcCls::DEBUG);
             }

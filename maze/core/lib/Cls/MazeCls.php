@@ -17,7 +17,7 @@ class MazeCls
             }elseif($_REQUEST["act"]=="gmn"){
                 $bGmn=true;
             }elseif($_REQUEST["act"]=="gmr"){
-                echo "old game";
+                $bGmn=false;
             }elseif($_REQUEST["act"]=="set"){
                 $sHtm=UserCls::show_settings();
             }else{
@@ -30,9 +30,18 @@ class MazeCls
             else echo ($sHtm)?:self::show_menu_main($aInfm);
             
             }
-            
         else
             echo $sSel=self::show_lng_sel();//language selector
+    }
+    public function new_map(){
+        $oMap=MapCls::get_map(1);
+        //echo "<pre>oMap";var_dump($oMap);echo "</pre>";
+        //exit;
+        //$bUsr=$oMap->is_win();
+        //echo "<pre>bUsr";var_dump($bUsr);echo "</pre>";
+        $sHtm="<br>".$oMap->show_map();
+        $sHtm.=$oMap->show_joy();
+        return $sHtm;
     }
     public function init_usr(array $aInf=null){
         $oUsr=new UserCls();
@@ -113,58 +122,6 @@ class MazeCls
                 <div class='hdr'>{$sMsg_hdr}</div>
                 <div class='sub'><input type='submit' name='2mn' value='{$sMsg_sub}'></div>
             </form>";
-        return $sHtm;
-    }
-    public function new_map(){
-        echo "<pre>this->oUsr";var_dump($this->oUsr);echo "</pre>";
-        $aMap=[
-[1,0,1,1,1,1,1,1,1],
-[1,0,0,0,0,0,0,0,1],
-[1,1,1,1,1,1,1,0,1],
-[1,0,0,0,0,0,0,0,1],
-[1,0,1,1,0,1,1,1,1],
-[1,0,0,1,0,0,0,0,1],
-[1,1,1,1,1,1,1,0,1],
-[1,0,0,0,0,0,0,0,1],
-[1,1,1,1,0,1,1,1,1],
-];
-        $oMap=new MapCls($aMap);
-        //echo "<pre>";var_dump($oMap);echo "</pre>";
-        $bVis=$oMap->set_vis(false);
-        //echo "<pre>bVis";var_dump($bVis);echo "</pre>";
-        $aEnt=$oMap->get_ent();
-        //echo "<pre>aEnt";var_dump($aEnt);echo "</pre>";
-        $aExt=$oMap->get_ext();
-        //echo "<pre>aExt";var_dump($aExt);echo "</pre>";
-        $bUsr=$oMap->set_usr();
-        //echo "<pre>bUsr";var_dump($bUsr);echo "</pre>";
-        $sHtm="<br>".$oMap->show_map();
-        //echo "<pre>oMap";var_dump($oMap);echo "</pre>";
-        /*$bUsr=$oMap->set_usr(MapCls::UP);
-        $bUsr=$oMap->set_usr(MapCls::LT);
-        $bUsr=$oMap->set_usr(MapCls::RT);
-        $bUsr=$oMap->set_usr(MapCls::RT);
-        $bUsr=$oMap->set_usr(MapCls::UP);
-        $bUsr=$oMap->set_usr(MapCls::LT);
-        $bUsr=$oMap->set_usr(MapCls::UP);
-        $bUsr=$oMap->set_usr(MapCls::LT);
-        $bUsr=$oMap->set_usr(MapCls::DN);
-        $bUsr=$oMap->set_usr(MapCls::UP);
-        $bUsr=$oMap->set_usr(MapCls::RT);
-        $bUsr=$oMap->set_usr(MapCls::RT);
-        $bUsr=$oMap->set_usr(MapCls::UP);
-        $bUsr=$oMap->set_usr(MapCls::LT);
-        $bUsr=$oMap->set_usr(MapCls::UP);*/
-        echo "<pre>bUsr";var_dump($bUsr);echo "</pre>";
-        $sHtm="<br>".$oMap->show_map();
-        echo "<pre>this->oUsr";var_dump($this->oUsr);echo "</pre>";
-        $sHtm.=$oMap->show_joy();
-        //exit;
-        //$oJoy=new JoysCls([0,2,4,6]);
-        //echo "<pre>oJoy";var_dump($oJoy);echo "</pre>";
-        //$sHtm.=$oJoy->show_joy();
-        //echo $sHtm;
-        //echo $oJoy->get_dir();
         return $sHtm;
     }
 }
