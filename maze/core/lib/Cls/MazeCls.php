@@ -19,8 +19,8 @@ class MazeCls
                 $bGmn=false;
             }elseif($_REQUEST["act"]=="set"){
                 $sHtm=UserCls::show_settings();
-            }elseif($_REQUEST["act"]=="mmn"){
-                
+            }elseif($_REQUEST["act"]=="inf"){
+                $bInf=true;
             }else
                 $aInfm[]=self::t("Please, select action");
         }
@@ -31,20 +31,14 @@ class MazeCls
             if(isset($bGmn)){
                 echo $this->oUsr->play($bGmn,$sDir);
                 echo self::show_menu_game();
+            }elseif($bInf){
+                echo "<div class='mes_inf'><pre>".file_get_contents(BDR."/core/lib/inf/license.txt")."</pre></div>";
+                echo "<div class='mes_inf'><pre>".file_get_contents(BDR."/core/lib/inf/credits.txt")."</pre></div>";
+                echo self::show_menu_game();
             }else
                 echo ($sHtm)?:self::show_menu_main($aInfm,$this->oUsr->is_map());
         }else
             echo $sSel=self::show_lng_sel();//language selector
-    }
-    public function new_map(){
-        $oMap=MapCls::get_map(1);
-        //echo "<pre>oMap";var_dump($oMap);echo "</pre>";
-        //exit;
-        //$bUsr=$oMap->is_win();
-        //echo "<pre>bUsr";var_dump($bUsr);echo "</pre>";
-        $sHtm="<br>".$oMap->show_map();
-        $sHtm.=$oMap->show_joy();
-        return $sHtm;
     }
     public function init_usr(array $aInf=null){
         $oUsr=new UserCls();
@@ -65,7 +59,7 @@ class MazeCls
             }
         }
         if(!$aErr){
-            if($sAut==self::t("Register"))$aDta=$oUsr->set_usr_dta($sLgn,$sPsw=$_REQUEST["psw"],["dt_reg"=>date("Y-m-d H:i:s"),"psw"=>password_hash($sPsw,PASSWORD_DEFAULT)]);
+            if($sAut==self::t("Register"))$aDta=$oUsr->set_usr_dta($sLgn,$sPsw=$_REQUEST["psw"],["dt_reg"=>date("Y-m-d H:i:s"),"psw"=>password_hash($sPsw,PASSWORD_DEFAULT),"lng"=>self::$sLng]);
             else $aDta=$oUsr->get_usr_dta($sLgn,$sPsw);
         }
         $sHtm=self::say_hi($aDta["lgn"]);
@@ -83,7 +77,7 @@ class MazeCls
     }
     public static function say_hi($sLgn=null){
         $sLgn=($sLgn)?:self::t("User");
-        $sHtm=self::t("Welcome to The Maze Game").", $sLgn!";
+        $sHtm="<div class='mes_inf'>".self::t("Welcome to The Maze Game").", $sLgn!</div>";
         return $sHtm;
     }
     public static function show_lng_sel(){
@@ -102,6 +96,7 @@ class MazeCls
         $sMsg_gmn=self::t("Play new game");
         $sMsg_gmr=self::t("Resume saved game");
         $sMsg_set=self::t("Customize");
+        $sMsg_inf=self::t("Info");
         $sMsg_ext=self::t("Exit");
         $sMsg_sub=self::t("Apply");
         $sDis=($bGnm===false)?" disabled='disabled'":"";
@@ -113,13 +108,15 @@ class MazeCls
                 <div class='opt'><input type='radio' name='act' id='gmn' value='gmn'><label for='gmn'>{$sMsg_gmn}</label></div>
                 <div class='opt'><input type='radio' name='act' id='gmr' value='gmr'{$sDis}><label for='gmr'>{$sMsg_gmr}</label></div>
                 <div class='opt'><input type='radio' name='act' id='set' value='set'><label for='set'>{$sMsg_set}</label></div>
+                <div class='opt'><input type='radio' name='act' id='inf' value='inf'><label for='inf'>{$sMsg_inf}</label></div>
                 <div class='opt'><input type='radio' name='act' id='ext' value='ext'><label for='ext'>{$sMsg_ext}</label></div>
                 <div class='sub'><input type='submit' name='do' value='{$sMsg_sub}'></div>
             </form>{$sInf}";
         return $sHtm;
     }
-    public static function show_menu_game(){
-        $sMsg_hdr=self::t("Game menu");
+    public static function show_menu_game($sHdr=null){
+        $sHdr=($sHdr)?:"Game menu";
+        $sMsg_hdr=self::t($sHdr);
         $sMsg_sub=self::t("Main menu");
         $sHtm="
             <form name='frm_mnu_gm' action='' method='post'>

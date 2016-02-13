@@ -122,20 +122,12 @@ class UserCls
     public function is_map(){
         return ($this->aDta["map"])?:false;
     }
-    public function play($bGmn=true,$sDir=null){
+    public function play($bGmn=true,$sDir=null,$iMp=null){
         try{
-            //echo "<pre>bGmn";var_dump($bGmn);echo "</pre>";
-            //echo "<pre>sDir";var_dump($sDir);echo "</pre>";
-            //echo "<pre>this->aDta";var_dump($this->aDta);echo "</pre>";
             if($bGmn){
-                $this->aDta["map"]=$oMap=MapCls::get_map(1);
-                //$this->aDta=$this->set_usr_dta($this->aDta["lgn"],null,$this->aDta);
+                $this->aDta["map"]=$oMap=MapCls::get_map($iMpc=(isset($iMp))?$iMp:1);
             }elseif($this->aDta["map"])
                 $oMap=$this->aDta["map"];
-            //echo "<pre>oMap";var_dump($oMap);echo "</pre>";
-            //exit;
-            //$bUsr=$oMap->is_win();
-            //echo "<pre>bUsr";var_dump($bUsr);echo "</pre>";
             if(!is_object($oMap))throw new ExcCls("No map",ExcCls::DEBUG);
             switch($sDir){
                 case "/\\":
@@ -154,13 +146,20 @@ class UserCls
                     unset($iDir);
             }
             if(isset($iDir))$oMap->set_usr($iDir);
-            if($oMap->is_win()){
-                $sHtm="<div class='mes_inf'>".self::t("You win!")."</div>";
-            }else{
-                $this->aDta=$this->set_usr_dta($this->aDta["lgn"],null,$this->aDta);
-                $sHtm="<br>".$oMap->show_map();
-                $sHtm.=$oMap->show_joy();
+            if($bWin=$oMap->is_win()){
+                $sHtm.="<div class='mes_inf'>".self::t("You win!")."</div>";
+                if($oMpn=MapCls::get_map($oMap->get_map_id()+1)){
+                    $this->aDta["map"]=$oMap=$oMpn;
+                    $bWin=$oMap->is_win();
+                    $sHtm.="<div class='mes_inf'>".self::t("Next level")."</div>";
+                }else
+                    $sHtm.="<div class='mes_inf'>".self::t("Congratulations!")."</div>";
             }
+            $this->aDta=$this->set_usr_dta($this->aDta["lgn"],null,$this->aDta);
+            $sHtm.=($sNm=$oMap->get_map_nm())?"<div class='mes_inf'>".self::t($sNm)."</div>":"";
+            $sHtm.=($sDsc=$oMap->get_map_dsc())?"<div class='mes_inf'>".self::t($sDsc)."</div>":"";
+            $sHtm.="<br>".$oMap->show_map();
+            if(!$bWin)$sHtm.=$oMap->show_joy();
         }catch(ExcCls $eExc){
             $eExc->man();
             throw $eExc;

@@ -3,6 +3,7 @@ namespace core\lib\cls;
 class MapCls
 {
     const PTH="/core/lib/lvl/";
+    private $mMp;//map id
     private $sNm;
     private $sDsc;
     private $aMap;
@@ -18,7 +19,8 @@ class MapCls
             if(!$sNm=$aLvl["nm"])throw new ExcCls("No map name",ExcCls::DEBUG);
             if(!$aMap=$aLvl["map"])throw new ExcCls("No map",ExcCls::DEBUG);
             $this->sNm=$sNm;
-            $this->sNm=$aLvl["dsc"];
+            $this->sDsc=$aLvl["dsc"];
+            $this->mMp=$aLvl["mmp"];
             if(isset($aLvl["way"])&&is_int($aLvl["way"]))$iWay=$aLvl["way"];
             if(isset($aLvl["wll"])&&is_int($aLvl["wll"]))$iWll=$aLvl["wll"];
             if(isset($aLvl["ent"])&&is_int($aLvl["ent"]))$iEnt=$aLvl["ent"];
@@ -60,12 +62,22 @@ class MapCls
             if(!$sMpn)throw new ExcCls("No map file name",ExcCls::DEBUG);
             if(!is_readable($sMpn))throw new ExcCls("No read map file",ExcCls::DEBUG);
             include_once($sMpn);
+            $aLvl["mmp"]=$mMp;
             $oMap=new self($aLvl);
         }catch(ExcCls $eExc){
             $eExc->man();
             throw $eExc;
         }finally{
             return $oMap;}
+    }
+    public function get_map_id(){
+        return $this->mMp;
+    }
+    public function get_map_nm(){
+        return $this->sNm;
+    }
+    public function get_map_dsc(){
+        return $this->sDsc;
     }
     public function show_map(){
         return MapPicCls4MapIfc::show_map($this->aMap);
