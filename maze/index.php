@@ -3,7 +3,7 @@ namespace core\lib;//namespace for all library
 require_once("ald.php");//registers standart autoloader
 if(!defined("SDR"))define("SDR",$_SERVER["DOCUMENT_ROOT"]);
 if(!defined("BDR"))define("BDR",getcwd());
-if(!defined("IN_DEV"))define("IN_DEV",true);
+if(!defined("IN_DEV"))define("IN_DEV",false);
 if(!session_id())session_start();
 //echo session_cache_expire();
 if(!function_exists(__NAMESPACE__."\\exc_hnd")){

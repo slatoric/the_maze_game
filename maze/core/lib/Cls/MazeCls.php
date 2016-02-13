@@ -50,6 +50,7 @@ class MazeCls
                 $bFmd=false;//enter mode
             }else{
                 if(!UserCls::is_usr_dta($sLgn)and($sAut==self::t("Enter"))){
+                    echo "<pre>sLgn";var_dump($sLgn);echo "</pre>";
                     $aErr[]=self::t('No match login');
                     $bFmd=true;//register mode
                 }elseif((!$sPsw=$_REQUEST["psw"])or((UserCls::is_usr_dta($sLgn))and(!$aDta=$oUsr->get_usr_dta($sLgn,$sPsw)))){//empty or wrong pass

@@ -3,7 +3,7 @@ namespace core\lib\cls;
 class UserCls
 {
     use \core\lib\trt\LngTrt;
-    private static $sCls4UserIfc=__NAMESPACE__."\\".UserFileCls4UserIfc;
+    private static $sCls4UserIfc="UserFileCls4UserIfc";
     private $aDta;
     function __construct(){
         
@@ -59,18 +59,19 @@ class UserCls
     }
     public static function is_usr_dta($sLgn){
         try{
-            if(!class_exists($sCls4UserIfc=self::$sCls4UserIfc))throw new ExcCls("No class for user interface",ExcCls::DEBUG);
+            if(!class_exists($sCls4UserIfc=__NAMESPACE__."\\".self::$sCls4UserIfc))throw new ExcCls("No class for user interface",ExcCls::DEBUG);
             if(!$sLgn)throw new ExcCls("No login",ExcCls::DEBUG);
             $bDta=$sCls4UserIfc::is_usr_dta($sLgn);
         }catch(ExcCls $eExc){
             $eExc->man();
             throw $eExc;
         }finally{
+            if(!class_exists($sCls4UserIfc=__NAMESPACE__."\\".self::$sCls4UserIfc))echo "No class for user interface";
             return $bDta;}
     }
     public static function del_usr_dta($sLgn){
         try{
-            if(!class_exists($sCls4UserIfc=self::$sCls4UserIfc))throw new ExcCls("No class for user interface",ExcCls::DEBUG);
+            if(!class_exists($sCls4UserIfc=__NAMESPACE__."\\".self::$sCls4UserIfc))throw new ExcCls("No class for user interface",ExcCls::DEBUG);
             if(!$sCls4UserIfc::is_usr_dta($sLgn))throw new ExcCls("No match login",ExcCls::DEBUG);
             if(!$bDel=$sCls4UserIfc::del_usr_dta($sLgn))throw new ExcCls("No delete login data",ExcCls::DEBUG);
         }catch(ExcCls $eExc){
@@ -83,7 +84,7 @@ class UserCls
         try{
             if($aDta=$this->aDta)$aDtr=$aDta;
             else{
-                if(!class_exists($sCls4UserIfc=self::$sCls4UserIfc))throw new ExcCls("No class for user interface",ExcCls::DEBUG);
+                if(!class_exists($sCls4UserIfc=__NAMESPACE__."\\".self::$sCls4UserIfc))throw new ExcCls("No class for user interface",ExcCls::DEBUG);
                 if(!self::is_usr_dta($sLgn))throw new ExcCls("No match login",ExcCls::DEBUG);
                 if((!$sPsw)and(!$sSid=session_id()))throw new ExcCls("No password or session",ExcCls::DEBUG);
                 if(!$aDta=$sCls4UserIfc::get_usr_dta($sLgn))throw new ExcCls("No read login data",ExcCls::DEBUG);
@@ -98,7 +99,7 @@ class UserCls
     }
     public function set_usr_dta($sLgn,$sPsw=null,array $aDta=null){
         try{
-            if(!class_exists($sCls4UserIfc=self::$sCls4UserIfc))throw new ExcCls("No class for user interface",ExcCls::DEBUG);
+            if(!class_exists($sCls4UserIfc=__NAMESPACE__."\\".self::$sCls4UserIfc))throw new ExcCls("No class for user interface",ExcCls::DEBUG);
             if(!$sLgn)throw new ExcCls("No login",ExcCls::DEBUG);
             if(!$sSid=session_id())throw new ExcCls("No session",ExcCls::DEBUG);
             if(!$aDta)throw new ExcCls("No login data",ExcCls::DEBUG);
