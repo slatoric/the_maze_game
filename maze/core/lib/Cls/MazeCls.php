@@ -44,6 +44,7 @@ class MazeCls
         $oUsr=new UserCls();
         UserCls::set_lng(self::$sLng);
         $sLgn=UserCls::log_in();
+        $aInf[]=self::t("If no match login it will be registered. No personal data collect");
         if($sAut=$_REQUEST["aut"]){
             if(!$sLgn){
                 $aErr[]=self::t('No login');
